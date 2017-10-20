@@ -3,8 +3,10 @@ var ExtractTextPlugin = require("extract-text-webpack-plugin");
 module.exports = {
 	devtool : 'source-map',
 	entry : {
-		a : './src/jsx/a.jsx',
-		//b : './src/jsx/b.jsx'
+		word : './src/jsx/word.js',
+		base : './src/jsx/base.js',
+		study : './src/jsx/study.js',
+		read : './src/jsx/read.js'
 	},
 	output : {
 		filename : '[name].js',
@@ -12,7 +14,7 @@ module.exports = {
 	},
 	module : {
 		loaders : [{
-			test : /\.jsx?$/,
+			test : /\.js$/,
 			include : path.resolve(__dirname, "src/jsx"),
 			loader : 'babel'
 		},{
@@ -21,6 +23,7 @@ module.exports = {
 			loader : ExtractTextPlugin.extract('css!less')
 		}]
 	},
+	watch : true,
 	plugins : [
 		new ExtractTextPlugin("../css/[name].css")
 	]

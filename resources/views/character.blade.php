@@ -104,7 +104,7 @@
 				<b style='font-size:1.5em'>{{$charactertype->name}}</b>
 			@endif
 			<span class='character-count'></span>
-			<button onclick="viewCharacterModal()" type="button" class='btn btn-info btn-sm pull-right'>ChangeType</button>
+			<!--<button onclick="viewCharacterModal()" type="button" class='btn btn-info btn-sm pull-right'>ChangeType</button>-->
 		</div>
 		<div class='panel-body'>
 			@if(session('type') == 'add')
@@ -113,7 +113,6 @@
 				<button class='btn btn-info btn-sm' id='split_article_btn'>SplitArticle</button>
 			</div>
 			@endif
-			<!--
 			<div class='panel panel-default character-panel'>
 				<div class='panel-heading'>
 					A
@@ -122,7 +121,6 @@
 					<div class='tag tag-active' item-id='1'>who <span>|</span> 2</div>
 				</div>
 			</div>
-			-->
 		</div>
 	</div>
 

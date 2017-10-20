@@ -8,7 +8,102 @@ use Request;
 use Session;
 use App\Http\Controllers\Controller;
 
-class CharacterController extends Controller {
+class WordController extends Controller {
+	public function index() {
+		return view('word');
+	}
+	public function show() {
+		$name = Request::input('name');
+		$words = DB::table('word')->where('name',$name)->get();
+		var_dump($words);
+	}
+	public function getWordsAll() {
+		$response['status'] = 1;
+		$words = DB::table('word')
+				->select('id','name','category','variant','state','origin','family')
+				->get();
+
+		$categorys = DB::table('category')
+					->orderBy('name')
+					->get();
+		$response['words'] = $words;
+		$response['categorys'] = $categorys;
+		return $response;
+	}
+	public function addWord() {
+		date_default_timezone_set('PRC');
+		$data['name'] = Request::input('name');
+		$data['meaning'] = Request::input('meaning');
+		$data['example'] = trim(Request::input('example'));
+		$data['variant'] = Request::input('variant');
+		$data['origin'] = Request::input('origin');
+		$data['category'] = Request::input('category');
+		$data['lettertype'] = Request::input('lettertype');
+		$data['pronun'] = Request::input('pronun');
+		$data['family'] = Request::input('family');
+		$word = DB::table('word')->where('name',$data['name'])->where('category',$data['category'])->first();
+		$data['count'] = count(preg_split('/\n/',$data['example']));
+		if($word) {
+			//$data['meaning'] = trim(($word->meaning).$data['meaning']);
+			if(!trim($word->example))
+				$data['example'] = trim($data['example']);
+			else
+				$data['example'] = trim($word->example)."\n".trim($data['example']);
+			$data['count'] += $word->count;
+			//$data['id'] = $word->id;
+			DB::table('word')->where('name',$data['name'])->where('category',$data['category'])->update(['example' => $data['example'],'count' => $data['count']]);
+		}
+		else {
+			$data['created_at'] = date('Y-m-d H:i:s');
+			$data['updated_at'] = date('Y-m-d H:i:s');
+			$data['id'] = DB::table('word')->insertGetId($data);
+		}
+		$response['word'] = $data;
+		$response['status'] = 1;
+		return $response;
+	}
+	public function updateWord() {
+		date_default_timezone_set('PRC');
+		$data['name'] = Request::input('name');
+		$data['meaning'] = Request::input('meaning');
+		$data['example'] = trim(Request::input('example'));
+		$data['variant'] = Request::input('variant');
+		$data['origin'] = Request::input('origin');
+		$data['pronun'] = Request::input('pronun');
+		$data['category'] = Request::input('category');
+		$data['family'] = Request::input('family');
+		$data['lettertype'] = Request::input('lettertype');
+		$data['count'] = count(preg_split('/\n/',$data['example']));
+		$id = Request::input('id');
+		$data['updated_at'] = date('Y-m-d H:i:s');
+		DB::table('word')->where('id',$id)->update($data);
+
+		$response['status'] = 1;
+		return $response;
+	}
+	public function addCategory() {
+		date_default_timezone_set('PRC');
+		$data['name'] = Request::input('category');
+		$data['created_at'] = date('Y-m-d H:i:s');
+		$data['updated_at'] = date('Y-m-d H:i:s');
+		$data['id'] = DB::table('category')->insertGetId($data);
+		$response['status'] = 1;
+		$response['category'] = $data;
+		return $response;
+	}
+	public function getWordById() {
+		date_default_timezone_set('PRC');
+		$id = Request::input('id');
+		$word = DB::table('word')->where('id',$id)->first();
+		DB::table('word')->where('id',$id)->update(['viewed_at' => date('Y-m-d')]);
+		$response['status'] = 1;
+		$response['word'] = $word;
+		return $response;
+	}
+	public function getWordByCategaryAndName() {
+		
+	}
+	/*
 	public function index($type) {
 		$charactertypes = DB::table('charactertype')->get();
 		if(!session('charactertype')) {
@@ -25,6 +120,7 @@ class CharacterController extends Controller {
 
 		return view('character',['charactertypes' => $charactertypes,'charactertype' => $charactertype,'characters' => $characters]);
 	}
+	*/
 	public function changecharactertype() {
 		$type = Input::get('type');
 		session(['charactertype' => $type]);
@@ -158,48 +254,61 @@ class CharacterController extends Controller {
 		return $response;
 	}
 	public function doSomething() {
-		/*
-		$characters = DB::table('_character')
-			->where('charactertypeId',2)
+
+		DB::table('word')->where('category','GONE WITH THE WIND')->update(['state' => 1]);
+		return;
+		$words = DB::table('word')
+			->get();
+		foreach ($words as $i => $word) {
+			$category = trim($word->category);
+			DB::table('word')->where('id',$word->id)->update(['category' => $category]);
+		}
+		return;
+
+		DB::table('word')->where('category','DIVERGENT')->delete();
+		$words = DB::table('word')
+			->where('category','GAME')
+			->where('state',1)
+			//->where('name','gallantry')
 			->orderBy('count','desc')
 			->get();
-		foreach ($characters as $i => $character) {
-			$examples = preg_split('/\n/',$character->example);
-			foreach($examples as $example) {
-				$example = str_replace('Mr.','Mr,',$example);
-				$example = str_replace('Mrs.','Mrs,',$example);
-				$example = str_replace('St.','St,',$example);
-				$example = str_replace('."',',"',$example);
-				$example = str_replace('.(1)','',$example);
-				$example = str_replace('.(2)','',$example);
-				$example = str_replace('.(3)','',$example);
-				$example = str_replace('.(4)','',$example);
-				$example = trim($example," \t\n\r\0\x0B.");
-				if(stripos($example,'.') !== false) {
-					//echo $example;
-					var_dump($character->name);
-					var_dump($example);
-					break;
+		$max = count($words);
+		$wordMap = array();
+		foreach ($words as $i => $word) {
+			$origin = $word->origin;
+			if(empty($wordMap[$origin])) {
+				$wordMap[$origin] = array();
+				$wordMap[$origin]['count'] = 1;
+				$wordMap[$origin]['words'] = array();
+			}
+			$wordMap[$origin]['count'] += $word->count;
+			$wordMap[$origin]['count']--;
+			array_push($wordMap[$origin]['words'],$word->name);
+			//array_push($wordMap[$origin]['words'],$word->id);
+			/*
+			$example = trim($word->example);
+			$examples = preg_split('/\n/',$example);
+			$count = count($examples);
+			DB::table('word')->where('id',$word->id)->update(['count' => $count]);
+			*/
+		}
+		rsort($wordMap);
+		var_dump($wordMap);
+		$i = 0;
+		foreach ($wordMap as $name => $wordInfo) {
+			$i++;
+			if($i <= $max * 0.1) {
+				//var_dump($wordMap[$name]);
+				foreach($wordMap[$name]['words'] as $id) {
+					//DB::table('word')->where('id',$id)->update(['state' => 1]);
+				}
+			}
+			else {
+				foreach($wordMap[$name]['words'] as $id) {
+					//DB::table('word')->where('id',$id)->update(['state' => 0]);
 				}
 			}
 		}
-		*/
-		/*
-		$characters = DB::table('_character')->where('charactertypeId',2)->orderBy('count','desc')->get();
-		$num = (int)(count($characters) * 0.1);
-		for($i = 0; $i <= $num; $i++) {
-			//var_dump($characters[$i]->name);
-			DB::table('_character')->where('id',$characters[$i]->id)->update(['state' => 1]);
-		}
-		*/
-		/*
-		foreach ($characters as $i => $character) {
-			$examples = preg_split('/\n/',$character->example);
-			$count = count($examples);
-			if(!$examples[$count - 1])
-				$count--;
-			DB::table('_character')->where('id',$character->id)->update(['count' => $count]);
-		}
-		*/
+		//var_dump($wordMap);		
 	}
 }

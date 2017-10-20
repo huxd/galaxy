@@ -1,19 +1,26 @@
 <?php
-Route::get('/', function () {
-    return view('welcome');
-});
-Route::get('/word',function() {
-	return view('word');
-});
-Route::get('/test',function() {
-	return view('test');
-});
+Route::get('/', 'WordController@index');
+Route::get('/add', 'WordController@index');
+Route::get('/update', 'WordController@index');
+
+Route::get('/getWordsAll', 'WordController@getWordsAll');
+Route::any('/addWord', 'WordController@addWord');
+Route::any('/updateWord', 'WordController@updateWord');
+Route::any('/addCategory', 'WordController@addCategory');
+Route::any('/getWordById', 'WordController@getWordById');
+Route::any('/show','WordController@show');
+Route::any('/doSomething','WordController@doSomething');
+
+Route::any('/study','StudyController@index');
+
 Route::post('word/getwords','WordController@getwords');
 Route::post('word/changewordtype','WordController@changewordtype');
 Route::post('word/saveword','WordController@saveword');
 Route::post('word/queryWord','WordController@queryWord');
 Route::get('word/wordIndex','WordController@wordindex');
 //Route::get('/','WordController@wordindex');
+
+Route::get('/read','ReadController@index');
 
 Route::get('/phrase/phraseIndex','PhraseController@phraseIndex');
 Route::get('/phrase/{type}','PhraseController@phrase');
@@ -39,6 +46,3 @@ Route::get('/character/getCharacters','characterController@getCharacters');
 Route::any('/character/splitArticle','characterController@splitArticle');
 Route::post('/character/addCharacter','characterController@addCharacter');
 Route::post('/character/updateCharacter','characterController@updateCharacter');
-Route::any('/character/doSomething','characterController@doSomething');
-
-Route::get('/admin/createDB','AdminController@createDB');

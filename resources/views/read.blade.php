@@ -1,7 +1,7 @@
 @extends('base')
 
 @section('css')
-	<link rel="stylesheet" type="text/css" href="{{config('app.baseUrl')}}/css/word.css">
+	<link rel="stylesheet" type="text/css" href="{{config('app.baseUrl')}}/css/read.css">
 @endsection
 
 @section('content')
@@ -10,8 +10,8 @@
 
 @section('script')
 	<script type="text/javascript">
-		$('li#word').addClass('active');
+		$('li#read').addClass('active');
 	</script>
 	<script type="text/javascript" src="{{config('app.baseUrl')}}/js/vendor/jquery.cookie.js"></script>
-	<script type="text/javascript" src="{{config('app.baseUrl')}}/js/word.js"></script>
+	<script type="text/javascript" src="{{config('app.baseUrl')}}/js/read.js"></script>
 @endsection
