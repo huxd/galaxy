@@ -13,14 +13,16 @@ class MeaningTable extends Migration
      */
     public function up()
     {
+        /*
         Schema::create('meaning', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('word_id');
             $table->unsignedInteger('category_id');
-            $table->string('entity');
+            $table->string('entity', 512);
             $table->text('example');
             $table->timestamps();
         });
+        */
     }
 
     /**
@@ -30,6 +32,6 @@ class MeaningTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('meaning');
+        //Schema::dropIfExists('meaning');
     }
 }

@@ -4,7 +4,8 @@
 	<meta charset="utf-8">
 	<title>Poppy</title>
 	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0" />
-	<link rel="stylesheet" type="text/css" href="{{config('app.baseUrl')}}/css/vendor/bootstrap.min.css" />
+	<!--<link rel="stylesheet" type="text/css" href="{{config('app.baseUrl')}}/css/vendor/bootstrap.min.css" />-->
+	<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<link rel="stylesheet" type="text/css" href="{{config('app.baseUrl')}}/css/base.css" />
 	@yield('css')
 </head>

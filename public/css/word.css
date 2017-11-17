@@ -1,3 +1,35 @@
+.angel-input {
+  outline: none;
+  padding: 5px 6px;
+  font-size: 14px;
+  line-height: 20px;
+  color: #555;
+  border: 1px solid #d9edf7;
+  border-radius: 4px;
+  max-width: 100%;
+}
+.angel-textarea {
+  outline: none;
+  padding: 6px 12px;
+  color: #555;
+  border-radius: 4px;
+  width: 100%;
+  border: 1px solid #d9edf7;
+}
+.angel-textarea:focus {
+  border-color: #5bc0de;
+}
+.angel-input:focus {
+  border-color: #5bc0de;
+}
+.btn-circle {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  padding: 1px 0;
+  border-radius: 15px;
+  line-height: 100%;
+}
 .panel {
   position: relative;
 }
@@ -58,53 +90,55 @@
 .category-area button {
   border-radius: 50%;
 }
-#show_character_modal .item .title {
-  color: #5bc0de;
-}
-#show_character_modal .item a {
-  cursor: pointer;
-  margin: 0px 5px;
+/*word modal*/
+#show_character_modal {
+  /*name area*/
+  /*family, origin, pronun area*/
+  /*type, variant, meaning area*/
+  /*meaning item*/
 }
 #show_character_modal .name-area {
   text-align: center;
 }
-#show_character_modal .name-area input {
-  width: auto;
-  display: inline;
-}
-#show_character_modal .name-area span {
-  font-weight: bold;
-  font-size: 28px;
-  line-height: 34px;
-}
-#show_character_modal .count-area input {
-  width: auto;
-  display: inline;
-}
-#show_character_modal .example-area {
-  margin-bottom: 15px;
-  margin-top: 15px;
-}
-#show_character_modal .example-area .item {
-  margin-bottom: 10px;
-}
-#show_character_modal .example-area .item .title {
-  margin-bottom: 10px;
-  border-bottom: 2px solid #5bc0de;
-  color: #5bc0de;
-}
-#show_character_modal .example-area .item #example,
-#show_character_modal .example-area .item #meaning {
-  white-space: pre-wrap;
-}
 #show_character_modal .origin-area {
   color: #5bc0de;
+  margin: 5px 0px;
+}
+#show_character_modal .origin-area label {
+  width: 80px;
 }
 #show_character_modal .origin-area span {
   color: black;
 }
 #show_character_modal .origin-area .glyphicon {
   color: #5bc0de;
+}
+#show_character_modal .item-area {
+  margin-bottom: 10px;
+}
+#show_character_modal .item-area .title {
+  margin-bottom: 10px;
+  border-bottom: 2px solid #5bc0de;
+  color: #5bc0de;
+}
+#show_character_modal .item-area .add-meaning-btn-area {
+  text-align: center;
+}
+#show_character_modal .meaning-area {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  position: relative;
+}
+#show_character_modal .meaning-area .meaning-item {
+  width: 90%;
+  margin: 5px 0px;
+}
+#show_character_modal .meaning-area .del-meaning-btn-area {
+  text-align: center;
+  height: 100%;
+  width: 9%;
 }
 #show_character_modal .tabTag-area {
   position: absolute;

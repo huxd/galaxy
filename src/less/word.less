@@ -1,3 +1,5 @@
+@import "angel-ui.less";
+
 .panel {
   position: relative;
 }
@@ -61,51 +63,22 @@
     border-radius: 50%;
   }
 }
+
+
+/*word modal*/
 #show_character_modal {
-  .item {
-    .title {
-      color: #5bc0de;
-    }
-    a {
-      cursor: pointer;
-      margin: 0px 5px;
-    }
-  }
+  /*name area*/
   .name-area {
     text-align: center;
-    input {
-      width: auto;
-      display: inline;
-    }
-    span {
-      font-weight: bold;
-      font-size: 28px;
-      line-height: 34px;
-    }
   }
-  .count-area {
-    input {
-      width: auto;
-      display: inline;
-    }
-  }
-  .example-area {
-    margin-bottom: 15px;
-    margin-top: 15px;
-    .item {
-      .title {
-        margin-bottom: 10px;
-        border-bottom: 2px solid #5bc0de;
-        color: #5bc0de;
-      }
-      #example,#meaning {
-      	white-space: pre-wrap;
-      }
-      margin-bottom:10px;
-    }
-  }
+
+  /*family, origin, pronun area*/
   .origin-area {
     color: #5bc0de;
+    margin: 5px 0px;
+    label {
+      width: 80px;
+    }
     span {
       color: black;
     }
@@ -113,13 +86,45 @@
       color: #5bc0de;
     }
   }
+
+  /*type, variant, meaning area*/
+  .item-area {
+    margin-bottom:10px;
+    .title {
+      margin-bottom: 10px;
+      border-bottom: 2px solid #5bc0de;
+      color: #5bc0de;
+    }
+    .add-meaning-btn-area {
+      text-align: center;
+    }
+  }
+
+  /*meaning item*/
+  .meaning-area {
+    margin-bottom:10px;
+    display: flex;
+    align-items:center;
+    justify-content:space-around;
+    position: relative;
+    .meaning-item {
+      width: 90%;
+      margin: 5px 0px;
+    }
+    .del-meaning-btn-area {
+      text-align: center;
+      height: 100%;
+      width: 9%;
+    }
+  }
+
   .tabTag-area {
   	position: absolute;
   	right: 100%;
   	top: 50px;
   	width: 100px;
   	color: #8AA8BD;
-    	.tabTag {
+    .tabTag {
   	  padding: 5px;
   	  cursor: default;
   	  text-align: center;

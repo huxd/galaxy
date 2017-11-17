@@ -34,6 +34,7 @@ class InitDb extends Migration
             $table->string('variant');
             $table->text('meaning');
             $table->text('example');
+            $table->dateTime('viewed_at');
             $table->timestamps();
         });
         */
