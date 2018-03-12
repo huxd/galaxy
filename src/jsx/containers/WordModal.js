@@ -36,12 +36,17 @@ function VariantInputs(props) {
 function MeaningArea(props) {
     const meaningId = "meaning_" + props.id;
     const exampleId = "example_" + props.id;
+    const categoryId = "category_" + props.id;
+    const optionItems = props.categorys.map((category) => <option key={category.id} value={category.name}>{category.name}</option>)
     return (
         <div className='meaning-area'>
             <div className='meaning-item'>
                 <textarea rows="1" className='angel-textarea' id={meaningId} placeholder='meaning' value={props.meaning} onChange={props.handleChange} ></textarea>
                 <textarea rows="3" className='angel-textarea' id={exampleId} placeholder='example' value={props.example} onChange={props.handleChange} ></textarea>
             </div>
+            <select onChange={props.handleChange} id={categoryId} value={props.category}>
+                {optionItems}
+            </select>
             <div className='del-meaning-btn-area'><button className='btn btn-danger btn-circle' id={props.id} onClick={props.deleteMeaningArea}><span className="glyphicon glyphicon-remove" id={props.id}></span></button></div>
         </div>
     )
@@ -50,7 +55,7 @@ function MeaningAreas(props) {
     let meaningAreas = [];
     for(let meaningItem of props.meanings) {
         if(meaningItem.state != 'delete') {
-            meaningAreas.push(<MeaningArea key={meaningItem.id} {...meaningItem} deleteMeaningArea={props.deleteMeaningArea} handleChange={props.handleChange} />);
+            meaningAreas.push(<MeaningArea categorys={props.categoryInfo.categorys} key={meaningItem.id} {...meaningItem} deleteMeaningArea={props.deleteMeaningArea} handleChange={props.handleChange} />);
         }
     }
     return (
@@ -100,12 +105,11 @@ class WordModal extends React.Component {
         state.family.content = !!word.family ? word.family : '';
         state.origin.content = !!word.origin ? word.origin : word.name;
         state.pronun.content = !!word.pronun ? word.pronun : '';
-        //state.meaning.content = word.meaning.trim();
-        //state.example.content = word.example.trim();
         state.meaningId = 0;
         state.meanings = !!word.meanings ? word.meanings : [];
-        if(this.props.category == 'COMMON' || this.props.category == 'IGNORE')
-            state.example.content = '';
+        if(this.props.category == 'COMMON' || this.props.category == 'IGNORE') {
+            //state.meanings = '';
+        }
 
         /*单词的Type区域修改*/
         let typeIds = ['prep','conj','adj','adv','un','cn','v'];
@@ -118,11 +122,13 @@ class WordModal extends React.Component {
 
         /*单词的Variant区域修改*/
         let inputIds = ['did','done','doing','does','plural','more','most'];
-        for(let id of inputIds) 
+        for(let id of inputIds) {
             state[id].content = '';
+        }
         let variant = JSON.parse(word.variant);
-        for(let key in variant) 
+        for(let key in variant) {
             state[key].content = variant[key];
+        }
 
         this.setState(state);
     }
@@ -190,7 +196,7 @@ class WordModal extends React.Component {
             state['origin'].content = event.target.value;
         }
         let keys = event.target.id.split('_');
-        if(keys[0] == 'example' || keys[0] == 'meaning') {
+        if(keys[0] == 'example' || keys[0] == 'meaning' || keys[0] == 'category') {
             let idStr = keys[1];
             if(keys.length === 3) {
                 idStr += '_' + keys[2];
@@ -199,6 +205,7 @@ class WordModal extends React.Component {
             for(let i = 0; i < meanings.length; i++) {
                 if(meanings[i].id == idStr) {
                     meanings[i][keys[0]] = event.target.value;
+                    break;
                 }
             }
         } else {
@@ -213,6 +220,7 @@ class WordModal extends React.Component {
             example : '',
             id : 'add_' + state.meaningId
         };
+        meaningItem.category = this.props.category;
         state.meaningId++;
         state.meanings.push(meaningItem);
         this.setState(state);
@@ -239,10 +247,6 @@ class WordModal extends React.Component {
     get wordData() {
         let data = {};
         /*单词的基本信息*/
-        //data.meaning = this.state.meaning.content.trim();
-        //data.meaning = data.meaning == '' ? '' : '\n' + data.meaning;
-        //data.example = this.state.example.content.trim();
-        //data.example = data.example == '' ? '' : '\n' + data.example;
         data.name = this.state.name.content.trim();
         data.origin = this.state.origin.content.trim();
         data.pronun = this.state.pronun.content.trim();
@@ -273,6 +277,7 @@ class WordModal extends React.Component {
         data.variant = JSON.stringify(variant);
 
         /*单词的Meaning区域数据*/
+        //TODO：ADD的时候逻辑修改
         data.meanings = this.state.meanings;
         for(let i = 0; i < data.meanings.length; i++) {
             if(data.meanings[i].meaning.trim() == '' && data.meanings[i].example.trim() == '') {
@@ -289,6 +294,9 @@ class WordModal extends React.Component {
                 data.meanings[i].state = 'update';
             }
         }
+        if((this.props.category == "COMMON" || this.props.category == "IGNORE") && this.props.modalState == 'add') {
+            data.meanings = [];
+        }
         data.meanings = JSON.stringify(data.meanings);
 
         return data;
@@ -296,6 +304,7 @@ class WordModal extends React.Component {
     addWord() {
         let data = this.wordData;
         console.log(data);
+        //return;
         if(!data)
             return;
         $.post(baseUrl + '/index.php/addWord',data,function(data) {
@@ -379,7 +388,7 @@ class WordModal extends React.Component {
                     </div>
                     <div className={itemClass}>
                         <div className='title'><span className='glyphicon glyphicon-tags'></span> <label>Meaning:</label></div>
-                        <MeaningAreas {...this.state} deleteMeaningArea={this.deleteMeaningArea} handleChange={this.handleChange} />
+                        <MeaningAreas {...this.state} categoryInfo={this.props.categoryInfo} deleteMeaningArea={this.deleteMeaningArea} handleChange={this.handleChange} />
                         <div className='add-meaning-btn-area'><button className='btn btn-success btn-circle' onClick={this.addMeaningArea} ><span className="glyphicon glyphicon-plus"></span></button></div>
                     </div>
                 </Modal.Body>
@@ -397,7 +406,8 @@ function mapStateToProps(state) {
     return {
         status : state.wordModal,
         wordsMap : state.wordsMap,
-        category : state.categoryInfo.category
+        category : state.categoryInfo.category,
+        categoryInfo : state.categoryInfo
     }
 }
 

@@ -60910,7 +60910,7 @@
 	        for (var _iterator = words[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	            var word = _step.value;
 	
-	            if (word.state == 1) {
+	            if (word.meanings.length >= 1) {
 	                viWords.push(word);
 	            }
 	        }
@@ -60943,7 +60943,6 @@
 	    reviewInfo.date = date.getDate();
 	    reviewInfo.words = reviewWords;
 	    _jsCookie2.default.set('review', JSON.stringify(reviewInfo), { expires: 31 });
-	
 	    return reviewWords;
 	};
 	
@@ -60970,8 +60969,6 @@
 	                if (data.status === 1) {
 	                    this.props.dispatch(_actions.categoryActions.init(data.categorys));
 	
-	                    var reviewWords = getReviewWords(data.words);
-	
 	                    var originMap = {};
 	                    var _iteratorNormalCompletion2 = true;
 	                    var _didIteratorError2 = false;
@@ -60981,9 +60978,6 @@
 	                        for (var _iterator2 = data.words[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
 	                            var word = _step2.value;
 	
-	                            if (word.state == 1 && reviewWords.indexOf(word.id) > -1) {
-	                                word.review = true;
-	                            }
 	                            if (!originMap[word.origin]) originMap[word.origin] = [word];else originMap[word.origin].push(word);
 	                        }
 	                    } catch (err) {
@@ -61062,6 +61056,34 @@
 	                        }
 	                    }
 	
+	                    var reviewWords = getReviewWords(data.words);
+	                    var _iteratorNormalCompletion5 = true;
+	                    var _didIteratorError5 = false;
+	                    var _iteratorError5 = undefined;
+	
+	                    try {
+	                        for (var _iterator5 = data.words[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	                            var _word2 = _step5.value;
+	
+	                            if (reviewWords.indexOf(_word2.id) != -1) {
+	                                _word2.review = true;
+	                            }
+	                        }
+	                    } catch (err) {
+	                        _didIteratorError5 = true;
+	                        _iteratorError5 = err;
+	                    } finally {
+	                        try {
+	                            if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	                                _iterator5.return();
+	                            }
+	                        } finally {
+	                            if (_didIteratorError5) {
+	                                throw _iteratorError5;
+	                            }
+	                        }
+	                    }
+	
 	                    this.props.dispatch(_actions.wordsMapActions.init(data.words));
 	
 	                    /*初始化familyMap*/
@@ -61092,27 +61114,27 @@
 	            var wordsMap = this.props.wordsMap;
 	            var usefulWords = [];
 	            var wordsInfo = {};
-	            var _iteratorNormalCompletion5 = true;
-	            var _didIteratorError5 = false;
-	            var _iteratorError5 = undefined;
+	            var _iteratorNormalCompletion6 = true;
+	            var _didIteratorError6 = false;
+	            var _iteratorError6 = undefined;
 	
 	            try {
-	                for (var _iterator5 = wordsMap.values()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-	                    var wordsArr = _step5.value;
-	                    var _iteratorNormalCompletion7 = true;
-	                    var _didIteratorError7 = false;
-	                    var _iteratorError7 = undefined;
+	                for (var _iterator6 = wordsMap.values()[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+	                    var wordsArr = _step6.value;
+	                    var _iteratorNormalCompletion8 = true;
+	                    var _didIteratorError8 = false;
+	                    var _iteratorError8 = undefined;
 	
 	                    try {
-	                        for (var _iterator7 = wordsArr[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-	                            var word = _step7.value;
-	                            var _iteratorNormalCompletion8 = true;
-	                            var _didIteratorError8 = false;
-	                            var _iteratorError8 = undefined;
+	                        for (var _iterator8 = wordsArr[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+	                            var word = _step8.value;
+	                            var _iteratorNormalCompletion9 = true;
+	                            var _didIteratorError9 = false;
+	                            var _iteratorError9 = undefined;
 	
 	                            try {
-	                                for (var _iterator8 = word.meanings[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-	                                    var meaning = _step8.value;
+	                                for (var _iterator9 = word.meanings[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+	                                    var meaning = _step9.value;
 	
 	                                    if (meaning.category == category && !wordsInfo[word.name]) {
 	                                        wordsInfo[word.name] = word;
@@ -61128,65 +61150,33 @@
 	                                }
 	                                */
 	                            } catch (err) {
-	                                _didIteratorError8 = true;
-	                                _iteratorError8 = err;
+	                                _didIteratorError9 = true;
+	                                _iteratorError9 = err;
 	                            } finally {
 	                                try {
-	                                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
-	                                        _iterator8.return();
+	                                    if (!_iteratorNormalCompletion9 && _iterator9.return) {
+	                                        _iterator9.return();
 	                                    }
 	                                } finally {
-	                                    if (_didIteratorError8) {
-	                                        throw _iteratorError8;
+	                                    if (_didIteratorError9) {
+	                                        throw _iteratorError9;
 	                                    }
 	                                }
 	                            }
 	                        }
 	                    } catch (err) {
-	                        _didIteratorError7 = true;
-	                        _iteratorError7 = err;
+	                        _didIteratorError8 = true;
+	                        _iteratorError8 = err;
 	                    } finally {
 	                        try {
-	                            if (!_iteratorNormalCompletion7 && _iterator7.return) {
-	                                _iterator7.return();
+	                            if (!_iteratorNormalCompletion8 && _iterator8.return) {
+	                                _iterator8.return();
 	                            }
 	                        } finally {
-	                            if (_didIteratorError7) {
-	                                throw _iteratorError7;
+	                            if (_didIteratorError8) {
+	                                throw _iteratorError8;
 	                            }
 	                        }
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError5 = true;
-	                _iteratorError5 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
-	                        _iterator5.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError5) {
-	                        throw _iteratorError5;
-	                    }
-	                }
-	            }
-	
-	            usefulWords.sort();
-	            var words = {};
-	            var _iteratorNormalCompletion6 = true;
-	            var _didIteratorError6 = false;
-	            var _iteratorError6 = undefined;
-	
-	            try {
-	                for (var _iterator6 = usefulWords[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-	                    var _word2 = _step6.value;
-	
-	                    var letter = _word2[0].toUpperCase();
-	                    if (!!words[letter]) {
-	                        words[letter].push(wordsInfo[_word2]);
-	                    } else {
-	                        words[letter] = [wordsInfo[_word2]];
 	                    }
 	                }
 	            } catch (err) {
@@ -61200,6 +61190,38 @@
 	                } finally {
 	                    if (_didIteratorError6) {
 	                        throw _iteratorError6;
+	                    }
+	                }
+	            }
+	
+	            usefulWords.sort();
+	            var words = {};
+	            var _iteratorNormalCompletion7 = true;
+	            var _didIteratorError7 = false;
+	            var _iteratorError7 = undefined;
+	
+	            try {
+	                for (var _iterator7 = usefulWords[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+	                    var _word3 = _step7.value;
+	
+	                    var letter = _word3[0].toUpperCase();
+	                    if (!!words[letter]) {
+	                        words[letter].push(wordsInfo[_word3]);
+	                    } else {
+	                        words[letter] = [wordsInfo[_word3]];
+	                    }
+	                }
+	            } catch (err) {
+	                _didIteratorError7 = true;
+	                _iteratorError7 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion7 && _iterator7.return) {
+	                        _iterator7.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError7) {
+	                        throw _iteratorError7;
 	                    }
 	                }
 	            }

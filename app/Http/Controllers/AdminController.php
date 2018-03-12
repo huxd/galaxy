@@ -12,15 +12,23 @@ class AdminController extends Controller {
 		$username = env('DB_USERNAME');
 		$password = env('DB_PASSWORD');
 
-		$mysql = @new \mysqli($host,$username,$password);
+		$mysql = @new \mysqli($host, $username, $password);
 		
 		//$mysql->query("create database $name default character set utf8");
-		$mysql = @new \mysqli("localhost",$username,$password,$name);
+		$mysql = @new \mysqli("localhost", $username, $password, $name);
+		
+		CREATE TABLE `category` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `name` varchar(30) COLLATE utf8_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 		DB::statement('"create table category(
 			id int(11) not null auto_increment,
 			name varchar(30),
 			primary key(id)
-		)"');
+		) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci"');
 
 		$check = array();
 		$check['category'] = $mysql->query("create table category(
@@ -29,7 +37,7 @@ class AdminController extends Controller {
 			primary key(id)
 		)");
 
-		$check['category'] = $mysql->query("create table word(
+		$check['word'] = $mysql->query("create table word(
 			id int(11) not null auto_increment,
 			name varchar(30),
 			primary key(id)

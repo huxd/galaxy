@@ -7,16 +7,38 @@ import Select from '../containers/Select';
 
 var baseUrl = '/galaxy/public';
 
+var getWordItem = function(word, type) {
+
+}
+
+function Article(props) {
+    let wordItems = [];
+    for(let word of props.words) {
+        if(!!word.type) {
+            wordItems.push(<span class={word.type}><b>{word}</b></span>)
+        } else {
+            wordItems.push(<span>{word}</span>)
+        }
+    }
+    return (
+        <div className='article' >
+            {wordItems}
+        </div>
+    )
+}
+
 class ReadPage extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
             article : "",
-            novel : ""
+            novel : "",
+            words : []
         };
         this.changeWords = this.changeWords.bind(this);
         this.splitArticle = this.splitArticle.bind(this);
         this.selectOption = this.selectOption.bind(this);
+        this.displayMeaning = this.displayMeaning.bind(this);
     }
     componentDidMount() {
         $.get(baseUrl + '/index.php/getWordsAll',function(data) {
@@ -27,6 +49,9 @@ class ReadPage extends React.Component {
             }
         }.bind(this));
     }
+    displayMeaning() {
+        console.log(1);
+    }
     splitArticle(event) {
         let state = _.clone(this.state, true);
         state.article = event.target.value;
@@ -36,58 +61,39 @@ class ReadPage extends React.Component {
         let allWordsMap = this.props.wordsMap;
         let state = _.clone(this.state, true);
         let novel = this.state.article;
-        var article = (this.state.article).replace(/((Mr)|(Mrs)|(St))\./g,'$1,');
-        article = article.replace(/\.\.\./g,',,,');
-        var sentences = article.split(/\.|\!|\?|;/);
-        var wordsMap = {};
-        let unknownWords = [];
-        let keyWords = [];
-        for(let i in sentences) {
-            let sentence = sentences[i].replace(/((Mr)|(Mrs)|(St)),/g,'$1.');
-            sentence = sentence.replace(/,,,/g,'...');
-            sentence = sentence.replace(/\n/g,' ') + '.';
-            sentence = sentence.replace(/‘|’/g,'\'');
-            sentence = sentence.trim();
-            let wordsArr = sentences[i].split(/\s|,|:|‘|’|“|”|\(|\)|"|'|—|\$|#|-|\[|\]|\{|\}|\\|\<|\>|\//);
-            for(let word of wordsArr) {
-                if(!word || /[0-9]+/.test(word))
+        let word = '';
+        let tmpNovel = '';
+        for (let i in novel) {
+            let ch = novel[i];
+            if((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')) {
+                word += ch;
+                if(i != novel.length - 1) {
                     continue;
-                word = word.toLowerCase();
-                if (!allWordsMap.has(word) && !wordsMap[word]) {
-                    if(word == 'din' || word == 'den')
-                        continue;
-                    unknownWords.push(word);
-                    wordsMap[word] = true;
                 }
-                else if(allWordsMap.has(word) && category != 'COMMON' && category != 'IGNORE') {
-                    let has = false;
-                    for(let w of allWordsMap.get(word)) {
-                        if(w.category == 'COMMON' || w.category == 'IGNORE' || w.state == 1) {
-                            has = true;
-                        }
-                        if(w.category == category && w.state == 1 && !wordsMap[word]) {
-                            keyWords.push(word);
-                            wordsMap[word] = true;
-                        }
-                        if(w.category == category && w.state != 1) {
-                            has = false;
-                            break;
-                        }
-                    }
-                    if(!has && !wordsMap[word]) {
-                        unknownWords.push(word);
-                        wordsMap[word] = true;
+                ch = '';
+            }
+            let lword = word.toLowerCase();
+            if (!allWordsMap.has(lword)) {
+                word = '<span class="text-danger"><b>' + word + '</b></span>';
+            } else if(category != 'COMMON' && category != 'IGNORE') {
+                for(let w of allWordsMap.get(lword)) {
+                    if(w.category == category) {
+                        word = '<span onClick={this.displayMeaning} class="text-success"><b>' + word + '</b></span>';
+                        break;
+                    } else if(w.category != 'COMMON' && w.category != 'IGNORE') {
+                        word = '<span class="text-warning"><b>' + word + '</b></span>';
+                        break;
                     }
                 }
             }
+            tmpNovel += word;
+            tmpNovel += ch;
+            if(ch == '\n') {
+                tmpNovel += '\n';
+            }
+            word = '';
         }
-        novel = novel.replace(/\n/g, '\n\n');
-        novel = novel.replace(/—/g, '-');
-        for(let word of keyWords)
-            novel = novel.replace(new RegExp('([“ \\-’])(' + word +')([ ;,\\.\\-\\?\\!\\:’]+)','igm'),'$1<span class="text-success"><b>$2</b></span>$3');
-        for(let word of unknownWords)
-            novel = novel.replace(new RegExp('([“ \\-’])(' + word +')([ ;,\\.\\-\\?\\!\\:’]+)','igm'),'$1<span class="text-danger"><b>$2</b></span>$3');
-        state.novel = novel;
+        state.novel = tmpNovel;
         this.setState(state);
     }
     selectOption(option) {
@@ -101,8 +107,8 @@ class ReadPage extends React.Component {
                     <div className='panel-body'>
                         <div className='article-area'>
                             <textarea className='angel-textarea' value={this.state.article} onChange={this.splitArticle} id='article'></textarea>
-                            <div className='article' dangerouslySetInnerHTML={{__html: this.state.novel}}>
-                            </div>
+
+                            <Article {...this.state} />
                         </div>
                     </div>
                     <div className='category-area'>

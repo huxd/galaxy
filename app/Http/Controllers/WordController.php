@@ -93,7 +93,7 @@ class WordController extends Controller {
         $data['variant'] = Request::input('variant');
         $data['origin'] = Request::input('origin');
         $data['pronun'] = Request::input('pronun');
-        $data['category'] = Request::input('category');
+        //$data['category'] = Request::input('category');
         $data['family'] = Request::input('family');
         $data['lettertype'] = Request::input('lettertype');
         $id = Request::input('id');
@@ -103,16 +103,17 @@ class WordController extends Controller {
 
         /*添加meaning相关*/
         $meanings =  json_decode(Request::input('meanings'));
-        $category_id = DB::table('category')
-                        ->where('name', $data['category'])
-                        ->value('id');
+        
         foreach($meanings as $meaning) {
+            $category_id = DB::table('category')
+                        ->where('name', $meaning->category)
+                        ->value('id');
             $data = array();
             $data['entity'] = $meaning->meaning;
             $data['example'] = $meaning->example;
             $data['word_id'] = $id;
+            $data['category_id'] = $category_id;
             if($meaning->state == 'add') {
-                $data['category_id'] = $category_id;
                 $data['created_at'] = date('Y-m-d H:i:s');
                 $data['updated_at'] = date('Y-m-d H:i:s');
                 DB::table('meaning')->insert($data);
@@ -143,8 +144,9 @@ class WordController extends Controller {
         $id = Request::input('id');
         $word = DB::table('word')->where('id',$id)->first();
         $meanings = DB::table('meaning')
+                    ->join('category', 'category.id', '=', 'meaning.category_id')
                     ->where('word_id', $id)
-                    ->select('id', 'category_id', 'entity as meaning', 'example')
+                    ->select('meaning.id', 'category_id', 'entity as meaning', 'example', 'category.name as category')
                     ->get();
         DB::table('word')->where('id',$id)->update(['viewed_at' => date('Y-m-d')]);
         $response['status'] = 1;
@@ -198,14 +200,8 @@ class WordController extends Controller {
             }
         }
         */
-        DB::table('word')->where('category', 'GONE WITH THE WIND')->update(['state' => 0]);
-        return;
-        $words = DB::table('word')
-            ->get();
-        foreach ($words as $i => $word) {
-            $category = trim($word->category);
-            DB::table('word')->where('id',$word->id)->update(['category' => $category]);
-        }
+        DB::table('word')->where('category', 'DAVID COPPERFIELD')->update(['state' => 1]);
+       
         return;
 
         DB::table('word')->where('category','DIVERGENT')->delete();

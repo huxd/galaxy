@@ -61315,6 +61315,14 @@
 	function MeaningArea(props) {
 	    var meaningId = "meaning_" + props.id;
 	    var exampleId = "example_" + props.id;
+	    var categoryId = "category_" + props.id;
+	    var optionItems = props.categorys.map(function (category) {
+	        return _react2.default.createElement(
+	            'option',
+	            { key: category.id, value: category.name },
+	            category.name
+	        );
+	    });
 	    return _react2.default.createElement(
 	        'div',
 	        { className: 'meaning-area' },
@@ -61323,6 +61331,11 @@
 	            { className: 'meaning-item' },
 	            _react2.default.createElement('textarea', { rows: '1', className: 'angel-textarea', id: meaningId, placeholder: 'meaning', value: props.meaning, onChange: props.handleChange }),
 	            _react2.default.createElement('textarea', { rows: '3', className: 'angel-textarea', id: exampleId, placeholder: 'example', value: props.example, onChange: props.handleChange })
+	        ),
+	        _react2.default.createElement(
+	            'select',
+	            { onChange: props.handleChange, id: categoryId, value: props.category },
+	            optionItems
 	        ),
 	        _react2.default.createElement(
 	            'div',
@@ -61346,7 +61359,7 @@
 	            var meaningItem = _step2.value;
 	
 	            if (meaningItem.state != 'delete') {
-	                meaningAreas.push(_react2.default.createElement(MeaningArea, _extends({ key: meaningItem.id }, meaningItem, { deleteMeaningArea: props.deleteMeaningArea, handleChange: props.handleChange })));
+	                meaningAreas.push(_react2.default.createElement(MeaningArea, _extends({ categorys: props.categoryInfo.categorys, key: meaningItem.id }, meaningItem, { deleteMeaningArea: props.deleteMeaningArea, handleChange: props.handleChange })));
 	            }
 	        }
 	    } catch (err) {
@@ -61464,11 +61477,11 @@
 	            state.family.content = !!word.family ? word.family : '';
 	            state.origin.content = !!word.origin ? word.origin : word.name;
 	            state.pronun.content = !!word.pronun ? word.pronun : '';
-	            //state.meaning.content = word.meaning.trim();
-	            //state.example.content = word.example.trim();
 	            state.meaningId = 0;
 	            state.meanings = !!word.meanings ? word.meanings : [];
-	            if (this.props.category == 'COMMON' || this.props.category == 'IGNORE') state.example.content = '';
+	            if (this.props.category == 'COMMON' || this.props.category == 'IGNORE') {}
+	            //state.meanings = '';
+	
 	
 	            /*单词的Type区域修改*/
 	            var typeIds = ['prep', 'conj', 'adj', 'adv', 'un', 'cn', 'v'];
@@ -61554,7 +61567,9 @@
 	            var variant = JSON.parse(word.variant);
 	            for (var key in variant) {
 	                state[key].content = variant[key];
-	            }this.setState(state);
+	            }
+	
+	            this.setState(state);
 	        }
 	    }, {
 	        key: 'typeTagChange',
@@ -61623,7 +61638,7 @@
 	                state['origin'].content = event.target.value;
 	            }
 	            var keys = event.target.id.split('_');
-	            if (keys[0] == 'example' || keys[0] == 'meaning') {
+	            if (keys[0] == 'example' || keys[0] == 'meaning' || keys[0] == 'category') {
 	                var idStr = keys[1];
 	                if (keys.length === 3) {
 	                    idStr += '_' + keys[2];
@@ -61632,6 +61647,7 @@
 	                for (var i = 0; i < meanings.length; i++) {
 	                    if (meanings[i].id == idStr) {
 	                        meanings[i][keys[0]] = event.target.value;
+	                        break;
 	                    }
 	                }
 	            } else {
@@ -61648,6 +61664,7 @@
 	                example: '',
 	                id: 'add_' + state.meaningId
 	            };
+	            meaningItem.category = this.props.category;
 	            state.meaningId++;
 	            state.meanings.push(meaningItem);
 	            this.setState(state);
@@ -61680,6 +61697,7 @@
 	        value: function addWord() {
 	            var data = this.wordData;
 	            console.log(data);
+	            //return;
 	            if (!data) return;
 	            $.post(baseUrl + '/index.php/addWord', data, function (data) {
 	                if (data.status === 1) {
@@ -61885,7 +61903,7 @@
 	                                'Meaning:'
 	                            )
 	                        ),
-	                        _react2.default.createElement(MeaningAreas, _extends({}, this.state, { deleteMeaningArea: this.deleteMeaningArea, handleChange: this.handleChange })),
+	                        _react2.default.createElement(MeaningAreas, _extends({}, this.state, { categoryInfo: this.props.categoryInfo, deleteMeaningArea: this.deleteMeaningArea, handleChange: this.handleChange })),
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'add-meaning-btn-area' },
@@ -61923,10 +61941,6 @@
 	        get: function get() {
 	            var data = {};
 	            /*单词的基本信息*/
-	            //data.meaning = this.state.meaning.content.trim();
-	            //data.meaning = data.meaning == '' ? '' : '\n' + data.meaning;
-	            //data.example = this.state.example.content.trim();
-	            //data.example = data.example == '' ? '' : '\n' + data.example;
 	            data.name = this.state.name.content.trim();
 	            data.origin = this.state.origin.content.trim();
 	            data.pronun = this.state.pronun.content.trim();
@@ -62000,6 +62014,7 @@
 	            data.variant = JSON.stringify(variant);
 	
 	            /*单词的Meaning区域数据*/
+	            //TODO：ADD的时候逻辑修改
 	            data.meanings = this.state.meanings;
 	            for (var i = 0; i < data.meanings.length; i++) {
 	                if (data.meanings[i].meaning.trim() == '' && data.meanings[i].example.trim() == '') {
@@ -62016,6 +62031,9 @@
 	                    data.meanings[i].state = 'update';
 	                }
 	            }
+	            if ((this.props.category == "COMMON" || this.props.category == "IGNORE") && this.props.modalState == 'add') {
+	                data.meanings = [];
+	            }
 	            data.meanings = JSON.stringify(data.meanings);
 	
 	            return data;
@@ -62029,7 +62047,8 @@
 	    return {
 	        status: state.wordModal,
 	        wordsMap: state.wordsMap,
-	        category: state.categoryInfo.category
+	        category: state.categoryInfo.category,
+	        categoryInfo: state.categoryInfo
 	    };
 	}
 	
@@ -62104,10 +62123,29 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
+	var splitArticleToSentence = function splitArticleToSentence(article) {
+	    var stopWords = ['.', '!', '?', ';'];
+	    var sentences = [];
+	    var left = 0;
+	    for (var i = 0; i < article.length; i++) {
+	        if (stopWords.indexOf(article[i]) < 0) continue;
+	        if (i == left) {
+	            left++;
+	            continue;
+	        }
+	        sentences.push(article.substring(left, i + 1));
+	        left = i + 1;
+	    }
+	    //console.log(sentences);
+	    return sentences;
+	};
+	
+	//splitArticleToSentence("1.2?dasdsadasdsad....4444444444?")
+	
 	var splitArticle = function splitArticle(article, category, wordsMap) {
 	    article = article.replace(/((Mr)|(Mrs)|(St))\./g, '$1,');
 	    //article = article.replace(/\.{3}/g,',,,');
-	    var sentences = article.split(/\.|\!|\?|;/);
+	    var sentences = splitArticleToSentence(article);
 	    var wordsInfo = {};
 	    var usefulWords = [];
 	    for (var i in sentences) {
@@ -62115,7 +62153,7 @@
 	        //sentence = sentence.replace(/,,,/g,'...');
 	        sentence = sentence.replace(/‘|’/g, '\'');
 	        sentence = sentence.trim();
-	        var wordsArr = sentence.split(/\s|,|_|\*|\&|\%|\+|=|~|:|‘|’|“|”|\(|\)|"|'|—|\$|#|-|\[|\]|\{|\}|\\|\<|\>|\//);
+	        var wordsArr = sentence.split(/\.|\?|\!|;|\s|,|_|\*|\&|\%|\+|=|~|:|‘|’|“|”|\(|\)|"|'|—|\$|#|-|\[|\]|\{|\}|\\|\<|\>|\//);
 	        var _iteratorNormalCompletion = true;
 	        var _didIteratorError = false;
 	        var _iteratorError = undefined;
@@ -62169,6 +62207,35 @@
 	                                    has = false;
 	                                    break;
 	                                }
+	
+	                                var _iteratorNormalCompletion3 = true;
+	                                var _didIteratorError3 = false;
+	                                var _iteratorError3 = undefined;
+	
+	                                try {
+	                                    for (var _iterator3 = w.meanings[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                                        var meaning = _step3.value;
+	
+	                                        if (meaning.category != "COMMON" && meaning != "IGNORE") {
+	                                            has = true;
+	                                            //word.show = true;
+	                                            break;
+	                                        }
+	                                    }
+	                                } catch (err) {
+	                                    _didIteratorError3 = true;
+	                                    _iteratorError3 = err;
+	                                } finally {
+	                                    try {
+	                                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                                            _iterator3.return();
+	                                        }
+	                                    } finally {
+	                                        if (_didIteratorError3) {
+	                                            throw _iteratorError3;
+	                                        }
+	                                    }
+	                                }
 	                            }
 	                        } catch (err) {
 	                            _didIteratorError2 = true;
@@ -62185,7 +62252,9 @@
 	                            }
 	                        }
 	
-	                        if (!has) usefulWords.push(word);
+	                        if (!has) {
+	                            usefulWords.push(word);
+	                        }
 	                    }
 	                }
 	            }
@@ -62215,13 +62284,13 @@
 	    for (var _i = 1; _i <= 20; _i++) {
 	        ratioMap[_i] = 0;
 	    }var num = 0;
-	    var _iteratorNormalCompletion3 = true;
-	    var _didIteratorError3 = false;
-	    var _iteratorError3 = undefined;
+	    var _iteratorNormalCompletion4 = true;
+	    var _didIteratorError4 = false;
+	    var _iteratorError4 = undefined;
 	
 	    try {
-	        for (var _iterator3 = usefulWords[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	            var word = _step3.value;
+	        for (var _iterator4 = usefulWords[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	            var word = _step4.value;
 	
 	            var letter = word.name[0].toUpperCase();
 	            var count = word.count;
@@ -62229,7 +62298,7 @@
 	                num = count;
 	                console.log("<<< " + num + " >>>\n");
 	            }
-	            if (count >= 10) {
+	            if (count >= 6 || word.show) {
 	                console.log(word.name);
 	                if (!!words[letter]) {
 	                    words[letter].push(word);
@@ -62242,16 +62311,16 @@
 	            i++;
 	        }
 	    } catch (err) {
-	        _didIteratorError3 = true;
-	        _iteratorError3 = err;
+	        _didIteratorError4 = true;
+	        _iteratorError4 = err;
 	    } finally {
 	        try {
-	            if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	                _iterator3.return();
+	            if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                _iterator4.return();
 	            }
 	        } finally {
-	            if (_didIteratorError3) {
-	                throw _iteratorError3;
+	            if (_didIteratorError4) {
+	                throw _iteratorError4;
 	            }
 	        }
 	    }
@@ -62440,6 +62509,14 @@
 	                    try {
 	                        for (var _iterator3 = wordsArr[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
 	                            var word = _step3.value;
+	
+	                            if (category == "COMMON" || category == "IGNORE") {
+	                                if (word.category == category) {
+	                                    wordsInfo[word.name] = word;
+	                                    usefulWords.push(word.name);
+	                                    continue;
+	                                }
+	                            }
 	                            var _iteratorNormalCompletion4 = true;
 	                            var _didIteratorError4 = false;
 	                            var _iteratorError4 = undefined;

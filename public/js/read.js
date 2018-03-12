@@ -23783,6 +23783,58 @@
 	
 	var baseUrl = '/galaxy/public';
 	
+	var getWordItem = function getWordItem(word, type) {};
+	
+	function Article(props) {
+	    var wordItems = [];
+	    var _iteratorNormalCompletion = true;
+	    var _didIteratorError = false;
+	    var _iteratorError = undefined;
+	
+	    try {
+	        for (var _iterator = props.words[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	            var word = _step.value;
+	
+	            if (!!word.type) {
+	                wordItems.push(_react2.default.createElement(
+	                    'span',
+	                    { 'class': word.type },
+	                    _react2.default.createElement(
+	                        'b',
+	                        null,
+	                        word
+	                    )
+	                ));
+	            } else {
+	                wordItems.push(_react2.default.createElement(
+	                    'span',
+	                    null,
+	                    word
+	                ));
+	            }
+	        }
+	    } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	    } finally {
+	        try {
+	            if (!_iteratorNormalCompletion && _iterator.return) {
+	                _iterator.return();
+	            }
+	        } finally {
+	            if (_didIteratorError) {
+	                throw _iteratorError;
+	            }
+	        }
+	    }
+	
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'article' },
+	        wordItems
+	    );
+	}
+	
 	var ReadPage = function (_React$Component) {
 	    _inherits(ReadPage, _React$Component);
 	
@@ -23793,11 +23845,13 @@
 	
 	        _this.state = {
 	            article: "",
-	            novel: ""
+	            novel: "",
+	            words: []
 	        };
 	        _this.changeWords = _this.changeWords.bind(_this);
 	        _this.splitArticle = _this.splitArticle.bind(_this);
 	        _this.selectOption = _this.selectOption.bind(_this);
+	        _this.displayMeaning = _this.displayMeaning.bind(_this);
 	        return _this;
 	    }
 	
@@ -23811,6 +23865,11 @@
 	                    this.props.dispatch(_actions.wordsMapActions.init(data.words));
 	                }
 	            }.bind(this));
+	        }
+	    }, {
+	        key: 'displayMeaning',
+	        value: function displayMeaning() {
+	            console.log(1);
 	        }
 	    }, {
 	        key: 'splitArticle',
@@ -23829,144 +23888,60 @@
 	            var allWordsMap = this.props.wordsMap;
 	            var state = _lodash2.default.clone(this.state, true);
 	            var novel = this.state.article;
-	            var article = this.state.article.replace(/((Mr)|(Mrs)|(St))\./g, '$1,');
-	            article = article.replace(/\.\.\./g, ',,,');
-	            var sentences = article.split(/\.|\!|\?|;/);
-	            var wordsMap = {};
-	            var unknownWords = [];
-	            var keyWords = [];
-	            for (var i in sentences) {
-	                var sentence = sentences[i].replace(/((Mr)|(Mrs)|(St)),/g, '$1.');
-	                sentence = sentence.replace(/,,,/g, '...');
-	                sentence = sentence.replace(/\n/g, ' ') + '.';
-	                sentence = sentence.replace(/‘|’/g, '\'');
-	                sentence = sentence.trim();
-	                var wordsArr = sentences[i].split(/\s|,|:|‘|’|“|”|\(|\)|"|'|—|\$|#|-|\[|\]|\{|\}|\\|\<|\>|\//);
-	                var _iteratorNormalCompletion = true;
-	                var _didIteratorError = false;
-	                var _iteratorError = undefined;
-	
-	                try {
-	                    for (var _iterator = wordsArr[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                        var word = _step.value;
-	
-	                        if (!word || /[0-9]+/.test(word)) continue;
-	                        word = word.toLowerCase();
-	                        if (!allWordsMap.has(word) && !wordsMap[word]) {
-	                            if (word == 'din' || word == 'den') continue;
-	                            unknownWords.push(word);
-	                            wordsMap[word] = true;
-	                        } else if (allWordsMap.has(word) && category != 'COMMON' && category != 'IGNORE') {
-	                            var has = false;
-	                            var _iteratorNormalCompletion2 = true;
-	                            var _didIteratorError2 = false;
-	                            var _iteratorError2 = undefined;
-	
-	                            try {
-	                                for (var _iterator2 = allWordsMap.get(word)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                                    var w = _step2.value;
-	
-	                                    if (w.category == 'COMMON' || w.category == 'IGNORE' || w.state == 1) {
-	                                        has = true;
-	                                    }
-	                                    if (w.category == category && w.state == 1 && !wordsMap[word]) {
-	                                        keyWords.push(word);
-	                                        wordsMap[word] = true;
-	                                    }
-	                                    if (w.category == category && w.state != 1) {
-	                                        has = false;
-	                                        break;
-	                                    }
-	                                }
-	                            } catch (err) {
-	                                _didIteratorError2 = true;
-	                                _iteratorError2 = err;
-	                            } finally {
-	                                try {
-	                                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                                        _iterator2.return();
-	                                    }
-	                                } finally {
-	                                    if (_didIteratorError2) {
-	                                        throw _iteratorError2;
-	                                    }
-	                                }
-	                            }
-	
-	                            if (!has && !wordsMap[word]) {
-	                                unknownWords.push(word);
-	                                wordsMap[word] = true;
-	                            }
-	                        }
+	            var word = '';
+	            var tmpNovel = '';
+	            for (var i in novel) {
+	                var ch = novel[i];
+	                if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9') {
+	                    word += ch;
+	                    if (i != novel.length - 1) {
+	                        continue;
 	                    }
-	                } catch (err) {
-	                    _didIteratorError = true;
-	                    _iteratorError = err;
-	                } finally {
+	                    ch = '';
+	                }
+	                var lword = word.toLowerCase();
+	                if (!allWordsMap.has(lword)) {
+	                    word = '<span class="text-danger"><b>' + word + '</b></span>';
+	                } else if (category != 'COMMON' && category != 'IGNORE') {
+	                    var _iteratorNormalCompletion2 = true;
+	                    var _didIteratorError2 = false;
+	                    var _iteratorError2 = undefined;
+	
 	                    try {
-	                        if (!_iteratorNormalCompletion && _iterator.return) {
-	                            _iterator.return();
+	                        for (var _iterator2 = allWordsMap.get(lword)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                            var w = _step2.value;
+	
+	                            if (w.category == category) {
+	                                word = '<span onClick={this.displayMeaning} class="text-success"><b>' + word + '</b></span>';
+	                                break;
+	                            } else if (w.category != 'COMMON' && w.category != 'IGNORE') {
+	                                word = '<span class="text-warning"><b>' + word + '</b></span>';
+	                                break;
+	                            }
 	                        }
+	                    } catch (err) {
+	                        _didIteratorError2 = true;
+	                        _iteratorError2 = err;
 	                    } finally {
-	                        if (_didIteratorError) {
-	                            throw _iteratorError;
+	                        try {
+	                            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	                                _iterator2.return();
+	                            }
+	                        } finally {
+	                            if (_didIteratorError2) {
+	                                throw _iteratorError2;
+	                            }
 	                        }
 	                    }
 	                }
+	                tmpNovel += word;
+	                tmpNovel += ch;
+	                if (ch == '\n') {
+	                    tmpNovel += '\n';
+	                }
+	                word = '';
 	            }
-	            novel = novel.replace(/\n/g, '\n\n');
-	            novel = novel.replace(/—/g, '-');
-	            var _iteratorNormalCompletion3 = true;
-	            var _didIteratorError3 = false;
-	            var _iteratorError3 = undefined;
-	
-	            try {
-	                for (var _iterator3 = keyWords[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                    var _word = _step3.value;
-	
-	                    novel = novel.replace(new RegExp('([“ \\-’])(' + _word + ')([ ;,\\.\\-\\?\\!\\:’]+)', 'igm'), '$1<span class="text-success"><b>$2</b></span>$3');
-	                }
-	            } catch (err) {
-	                _didIteratorError3 = true;
-	                _iteratorError3 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	                        _iterator3.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError3) {
-	                        throw _iteratorError3;
-	                    }
-	                }
-	            }
-	
-	            var _iteratorNormalCompletion4 = true;
-	            var _didIteratorError4 = false;
-	            var _iteratorError4 = undefined;
-	
-	            try {
-	                for (var _iterator4 = unknownWords[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	                    var _word2 = _step4.value;
-	
-	                    novel = novel.replace(new RegExp('([“ \\-’])(' + _word2 + ')([ ;,\\.\\-\\?\\!\\:’]+)', 'igm'), '$1<span class="text-danger"><b>$2</b></span>$3');
-	                }
-	            } catch (err) {
-	                _didIteratorError4 = true;
-	                _iteratorError4 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-	                        _iterator4.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError4) {
-	                        throw _iteratorError4;
-	                    }
-	                }
-	            }
-	
-	            state.novel = novel;
+	            state.novel = tmpNovel;
 	            this.setState(state);
 	        }
 	    }, {
@@ -23991,7 +23966,7 @@
 	                            'div',
 	                            { className: 'article-area' },
 	                            _react2.default.createElement('textarea', { className: 'angel-textarea', value: this.state.article, onChange: this.splitArticle, id: 'article' }),
-	                            _react2.default.createElement('div', { className: 'article', dangerouslySetInnerHTML: { __html: this.state.novel } })
+	                            _react2.default.createElement(Article, this.state)
 	                        )
 	                    ),
 	                    _react2.default.createElement(

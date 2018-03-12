@@ -23,7 +23,7 @@ var getReviewWords = function(words) {
     /*要复习的单词集合*/
     let viWords = [];
     for(let word of words) {
-        if(word.state == 1) {
+        if(word.meanings.length >= 1) {
             viWords.push(word);
         }
     }
@@ -43,7 +43,6 @@ var getReviewWords = function(words) {
     reviewInfo.date = date.getDate();
     reviewInfo.words = reviewWords;
     Cookie.set('review', JSON.stringify(reviewInfo), {expires:31});
-
     return reviewWords;
 }
 
@@ -61,13 +60,8 @@ class StudyPage extends React.Component {
             if(data.status === 1) {
                 this.props.dispatch(categoryActions.init(data.categorys));
 
-                let reviewWords = getReviewWords(data.words);
-
                 let originMap = {}; 
                 for(let word of data.words) {
-                    if(word.state == 1 && reviewWords.indexOf(word.id) > -1) {
-                        word.review = true;
-                    }
                     if(!originMap[word.origin])
                         originMap[word.origin] = [word];
                     else
@@ -88,6 +82,12 @@ class StudyPage extends React.Component {
                     word.meanings = [];
                     if(meaningsMap.has(word.id)) {
                         word.meanings = meaningsMap.get(word.id);
+                    }
+                }
+                let reviewWords = getReviewWords(data.words);
+                for(let word of data.words) {
+                    if(reviewWords.indexOf(word.id) != -1) {
+                        word.review = true;
                     }
                 }
                 this.props.dispatch(wordsMapActions.init(data.words));

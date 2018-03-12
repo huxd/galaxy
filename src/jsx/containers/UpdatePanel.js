@@ -30,6 +30,13 @@ class Panel extends React.Component {
         let wordsInfo = {};
         for(let wordsArr of wordsMap.values()) {
             for(let word of wordsArr) {
+                if(category == "COMMON" || category == "IGNORE") {
+                    if(word.category == category) {
+                        wordsInfo[word.name] = word;
+                        usefulWords.push(word.name);
+                        continue;
+                    }
+                }
                 for(let meaning of word.meanings) {
                     if(meaning.category == category && !wordsInfo[word.name]) {
                         wordsInfo[word.name] = word;

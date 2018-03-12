@@ -4,11 +4,30 @@ import classNames from 'classnames';
 
 import Wordspanels from '../components/Wordspanels';
 
+var splitArticleToSentence = function(article) {
+    let stopWords = ['.', '!', '?', ';'];
+    let sentences = [];
+    let left = 0;
+    for(let i = 0; i < article.length; i++) {
+        if(stopWords.indexOf(article[i]) < 0)
+            continue;
+        if(i == left) {
+            left++;
+            continue;
+        }
+        sentences.push(article.substring(left, i + 1));
+        left = i + 1;
+    }
+    //console.log(sentences);
+    return sentences;
+}
+
+//splitArticleToSentence("1.2?dasdsadasdsad....4444444444?")
 
 var splitArticle = function(article, category, wordsMap) {
     article = article.replace(/((Mr)|(Mrs)|(St))\./g,'$1,');
     //article = article.replace(/\.{3}/g,',,,');
-    let sentences = article.split(/\.|\!|\?|;/);
+    let sentences = splitArticleToSentence(article);
     let wordsInfo = {};
     let usefulWords = [];
     for(let i in sentences) {
@@ -16,7 +35,7 @@ var splitArticle = function(article, category, wordsMap) {
         //sentence = sentence.replace(/,,,/g,'...');
         sentence = sentence.replace(/‘|’/g,'\'');
         sentence = sentence.trim();
-        let wordsArr = sentence.split(/\s|,|_|\*|\&|\%|\+|=|~|:|‘|’|“|”|\(|\)|"|'|—|\$|#|-|\[|\]|\{|\}|\\|\<|\>|\//);
+        let wordsArr = sentence.split(/\.|\?|\!|;|\s|,|_|\*|\&|\%|\+|=|~|:|‘|’|“|”|\(|\)|"|'|—|\$|#|-|\[|\]|\{|\}|\\|\<|\>|\//);
         for(let name of wordsArr) {
             if(!name || /[0-9]+/.test(name))
                 continue;
@@ -49,6 +68,7 @@ var splitArticle = function(article, category, wordsMap) {
                 if(!wordsMap.has(name)) {
                     usefulWords.push(word);
                 }
+                
                 else if(category != 'COMMON' && category != 'IGNORE') {
                     let has = false;
                     for(let w of wordsMap.get(name)) {
@@ -59,10 +79,21 @@ var splitArticle = function(article, category, wordsMap) {
                             has = false;
                             break;
                         }
+                        
+                        for(let meaning of w.meanings) {
+                            if(meaning.category != "COMMON" && meaning != "IGNORE") {
+                                has = true;
+                                //word.show = true;
+                                break;
+                            }
+                        }
+                        
                     }
-                    if(!has)
+                    if(!has) {
                         usefulWords.push(word);
+                    }
                 }
+                
             }
         }
     }
@@ -84,7 +115,7 @@ var letterToWordMap = function(usefulWords) {
             num = count;
             console.log("<<< " + num + " >>>\n");
         }
-        if(count >= 10) {
+        if(count >= 6 || word.show) {
             console.log(word.name);
             if(!!words[letter]) {
                 words[letter].push(word)
@@ -100,6 +131,7 @@ var letterToWordMap = function(usefulWords) {
         i++;
     }
     
+    
     console.log("<<<ratio>>>");
     console.log("------------------");
     let ratio = 0.0;
@@ -112,6 +144,7 @@ var letterToWordMap = function(usefulWords) {
     }
     console.log(all);
     console.log("------------------");
+    
     
     return words;
 }
