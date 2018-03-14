@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 
-import { categoryActions,wordsMapActions } from '../actions';
+import { categoryActions,wordsMapActions,cocaMapActions } from '../actions';
 import WordModal from '../containers/WordModal';
 import Select from '../containers/Select';
 import AddPanel from '../containers/AddPanel';
@@ -46,8 +46,15 @@ class WordPage extends React.Component {
                         word.meanings = meaningsMap.get(word.id);
                     }
                 }
-
                 this.props.dispatch(wordsMapActions.init(data.words));
+
+
+                let cocaMap = new Map();
+                for(let word of data.cocaWords) {
+                    if(!cocaMap.has(word.name))
+                        cocaMap.set(word.name, word.rank);
+                }
+                this.props.dispatch(cocaMapActions.init(cocaMap));
             }
         }.bind(this));
     }

@@ -23,6 +23,9 @@ const initialState = {
     /*单词以及该单词的各种变形对单词信息的映射*/
     wordsMap : new Map(),
 
+    /**/
+    cocaMap : new Map(),
+
     /*显示的单词*/
     words : [],
 
@@ -38,6 +41,14 @@ function wordsRuducer(state = initialState.words, action) {
             return action.words;
         case 'REMOVE_WORD':
             return state;
+        default:
+            return state;
+    }
+}
+function cocaMapRudcer(state = initialState.cocaMap, action) {
+    switch (action.type) {
+        case 'INIT_COCAMAP':
+            return action.cocaMap;
         default:
             return state;
     }
@@ -156,5 +167,6 @@ export const reducers = combineReducers({
     wordsMap : wordsMapReducer,
     familyMap : familyMapReducer,
     words : wordsRuducer,
-    originMap : originMapReducer
+    originMap : originMapReducer,
+    cocaMap : cocaMapRudcer
 });

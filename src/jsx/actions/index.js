@@ -72,3 +72,12 @@ export const originMapActions = {
 		}
 	}
 }
+
+export const cocaMapActions = {
+	'init' : function(cocaMap) {
+		return {
+			type : 'INIT_COCAMAP',
+			cocaMap : cocaMap
+		}
+	}
+}

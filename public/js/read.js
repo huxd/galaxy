@@ -60,11 +60,11 @@
 	
 	var _ReadPage2 = _interopRequireDefault(_ReadPage);
 	
-	var _reducers = __webpack_require__(474);
+	var _reducers = __webpack_require__(475);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	__webpack_require__(475);
+	__webpack_require__(476);
 	
 	var store = (0, _redux.createStore)(_reducers.reducers, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
 	
@@ -23773,6 +23773,10 @@
 	
 	var _Select2 = _interopRequireDefault(_Select);
 	
+	var _jsCookie = __webpack_require__(474);
+	
+	var _jsCookie2 = _interopRequireDefault(_jsCookie);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -23782,8 +23786,6 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
 	var baseUrl = '/galaxy/public';
-	
-	var getWordItem = function getWordItem(word, type) {};
 	
 	function Article(props) {
 	    var wordItems = [];
@@ -23795,23 +23797,37 @@
 	        for (var _iterator = props.words[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	            var word = _step.value;
 	
-	            if (!!word.type) {
-	                wordItems.push(_react2.default.createElement(
-	                    'span',
-	                    { 'class': word.type },
-	                    _react2.default.createElement(
-	                        'b',
-	                        null,
-	                        word
-	                    )
-	                ));
-	            } else {
-	                wordItems.push(_react2.default.createElement(
-	                    'span',
-	                    null,
-	                    word
-	                ));
+	            var item = null;
+	            switch (word.type) {
+	                case 'unknown':
+	                    item = _react2.default.createElement(
+	                        'span',
+	                        { key: word.key, className: 'word text-muted' },
+	                        word.name
+	                    );
+	                    break;
+	                case 'other':
+	                    item = _react2.default.createElement(
+	                        'span',
+	                        { key: word.key, onClick: props.handleClick, className: 'word special-word text-success', id: word.id },
+	                        word.name
+	                    );
+	                    break;
+	                case 'current':
+	                    item = _react2.default.createElement(
+	                        'span',
+	                        { key: word.key, onClick: props.handleClick, className: 'word special-word text-primary', id: word.id },
+	                        word.name
+	                    );
+	                    break;
+	                default:
+	                    item = _react2.default.createElement(
+	                        'span',
+	                        { key: word.key },
+	                        word.name
+	                    );
 	            }
+	            wordItems.push(item);
 	        }
 	    } catch (err) {
 	        _didIteratorError = true;
@@ -23830,7 +23846,16 @@
 	
 	    return _react2.default.createElement(
 	        'div',
-	        { className: 'article' },
+	        { className: 'article', onClick: props.hidePopover },
+	        _react2.default.createElement(
+	            _reactBootstrap.Overlay,
+	            { show: props.show, target: props.target, placement: 'top', container: this },
+	            _react2.default.createElement(
+	                _reactBootstrap.Popover,
+	                { id: 'popover-positioned-top', title: props.word.pronun },
+	                props.word.meanings[0].meaning
+	            )
+	        ),
 	        wordItems
 	    );
 	}
@@ -23846,12 +23871,36 @@
 	        _this.state = {
 	            article: "",
 	            novel: "",
-	            words: []
+	            words: [],
+	            word: {
+	                name: '',
+	                meanings: [{ 'meaning': '' }]
+	            }
 	        };
+	
+	        _this.handleClick = function (e) {
+	            var id = e.target.id;
+	            var target = e.target;
+	            $.get(baseUrl + '/index.php/getWordById?id=' + id, function (data) {
+	                if (data.status === 1) {
+	                    data.word.meanings = data.meanings;
+	                    var show = !this.state.show;
+	                    if (!show && target != this.state.target) {
+	                        show = !show;
+	                    }
+	                    this.setState({ target: target, show: show, word: data.word });
+	                }
+	            }.bind(_this));
+	            e.stopPropagation();
+	        };
+	
+	        _this.hidePopover = function (e) {
+	            _this.setState({ show: false });
+	        };
+	
 	        _this.changeWords = _this.changeWords.bind(_this);
 	        _this.splitArticle = _this.splitArticle.bind(_this);
 	        _this.selectOption = _this.selectOption.bind(_this);
-	        _this.displayMeaning = _this.displayMeaning.bind(_this);
 	        return _this;
 	    }
 	
@@ -23861,62 +23910,21 @@
 	            $.get(baseUrl + '/index.php/getWordsAll', function (data) {
 	                if (data.status === 1) {
 	                    this.props.dispatch(_actions.categoryActions.init(data.categorys));
-	
-	                    this.props.dispatch(_actions.wordsMapActions.init(data.words));
-	                }
-	            }.bind(this));
-	        }
-	    }, {
-	        key: 'displayMeaning',
-	        value: function displayMeaning() {
-	            console.log(1);
-	        }
-	    }, {
-	        key: 'splitArticle',
-	        value: function splitArticle(event) {
-	            var _this2 = this;
-	
-	            var state = _lodash2.default.clone(this.state, true);
-	            state.article = event.target.value;
-	            this.setState(state, function () {
-	                return _this2.changeWords(_this2.props.categoryInfo.category);
-	            });
-	        }
-	    }, {
-	        key: 'changeWords',
-	        value: function changeWords(category) {
-	            var allWordsMap = this.props.wordsMap;
-	            var state = _lodash2.default.clone(this.state, true);
-	            var novel = this.state.article;
-	            var word = '';
-	            var tmpNovel = '';
-	            for (var i in novel) {
-	                var ch = novel[i];
-	                if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9') {
-	                    word += ch;
-	                    if (i != novel.length - 1) {
-	                        continue;
-	                    }
-	                    ch = '';
-	                }
-	                var lword = word.toLowerCase();
-	                if (!allWordsMap.has(lword)) {
-	                    word = '<span class="text-danger"><b>' + word + '</b></span>';
-	                } else if (category != 'COMMON' && category != 'IGNORE') {
+	                    this.props.dispatch(_actions.categoryActions.set("DAVID COPPERFIELD"));
+	                    /*初始化wordsMap*/
+	                    var meaningsMap = new Map();
 	                    var _iteratorNormalCompletion2 = true;
 	                    var _didIteratorError2 = false;
 	                    var _iteratorError2 = undefined;
 	
 	                    try {
-	                        for (var _iterator2 = allWordsMap.get(lword)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                            var w = _step2.value;
+	                        for (var _iterator2 = data.meanings[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                            var meaning = _step2.value;
 	
-	                            if (w.category == category) {
-	                                word = '<span onClick={this.displayMeaning} class="text-success"><b>' + word + '</b></span>';
-	                                break;
-	                            } else if (w.category != 'COMMON' && w.category != 'IGNORE') {
-	                                word = '<span class="text-warning"><b>' + word + '</b></span>';
-	                                break;
+	                            if (!meaningsMap.has(meaning.word_id)) {
+	                                meaningsMap.set(meaning.word_id, [meaning]);
+	                            } else {
+	                                meaningsMap.get(meaning.word_id).push(meaning);
 	                            }
 	                        }
 	                    } catch (err) {
@@ -23933,21 +23941,171 @@
 	                            }
 	                        }
 	                    }
+	
+	                    var _iteratorNormalCompletion3 = true;
+	                    var _didIteratorError3 = false;
+	                    var _iteratorError3 = undefined;
+	
+	                    try {
+	                        for (var _iterator3 = data.words[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                            var word = _step3.value;
+	
+	                            word.meanings = [];
+	                            if (meaningsMap.has(word.id)) {
+	                                word.meanings = meaningsMap.get(word.id);
+	                            }
+	                        }
+	                    } catch (err) {
+	                        _didIteratorError3 = true;
+	                        _iteratorError3 = err;
+	                    } finally {
+	                        try {
+	                            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                                _iterator3.return();
+	                            }
+	                        } finally {
+	                            if (_didIteratorError3) {
+	                                throw _iteratorError3;
+	                            }
+	                        }
+	                    }
+	
+	                    this.props.dispatch(_actions.wordsMapActions.init(data.words));
+	                    $.get(baseUrl + '/index.php/getArticle', function (data) {
+	                        var _this2 = this;
+	
+	                        if (data.status === 1) {
+	                            var url = location.search;
+	                            var chapter = 0;
+	                            if (url.indexOf("?") != -1) {
+	                                var str = url.substr(1);
+	                                chapter = str.split('=')[1];
+	                            }
+	                            var chapters = data.article.content.split(/Chapter [0-9]+/g);
+	                            if (!!_jsCookie2.default.get('chapter') && (chapter == 0 || chapter == _jsCookie2.default.get('chapter'))) {
+	                                chapter = _jsCookie2.default.get('chapter');
+	                                scroll = _jsCookie2.default.get('scroll');
+	                                $('html').animate({ 'scrollTop': scroll });
+	                            } else if (chapter == 0) {
+	                                chapter = 1;
+	                            }
+	                            var article = chapters[chapter].trim();
+	                            article = "Chapter " + chapter + '\n\n' + article;
+	                            _jsCookie2.default.set('chapter', chapter, { expires: 31 });
+	                            console.log(this.props.categoryInfo);
+	                            this.setState({ article: article }, function () {
+	                                return _this2.changeWords(_this2.props.categoryInfo.category);
+	                            });
+	                        }
+	                    }.bind(this));
 	                }
-	                tmpNovel += word;
+	            }.bind(this));
+	
+	            window.addEventListener('scroll', function () {
+	                _jsCookie2.default.set('scroll', $(document).scrollTop(), { expires: 31 });
+	            });
+	        }
+	    }, {
+	        key: 'splitArticle',
+	        value: function splitArticle(event) {
+	            var _this3 = this;
+	
+	            var state = _lodash2.default.clone(this.state, true);
+	            state.article = event.target.value;
+	            this.setState(state, function () {
+	                return _this3.changeWords(_this3.props.categoryInfo.category);
+	            });
+	        }
+	    }, {
+	        key: 'changeWords',
+	        value: function changeWords(category) {
+	            var allWordsMap = this.props.wordsMap;
+	            var state = _lodash2.default.clone(this.state, true);
+	            var novel = this.state.article;
+	            var name = '';
+	            var tmpNovel = '';
+	            var id = 0;
+	            var words = [];
+	            for (var i in novel) {
+	                var ch = novel[i];
+	                if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9') {
+	                    name += ch;
+	                    if (i != novel.length - 1) {
+	                        continue;
+	                    }
+	                    ch = '';
+	                }
+	                var lword = name.toLowerCase();
+	                var word = {};
+	                if (!!name && !allWordsMap.has(lword)) {
+	                    word.name = name;
+	                    word.type = 'unknown';
+	                } else if (!!name && category != 'COMMON' && category != 'IGNORE') {
+	                    var _iteratorNormalCompletion4 = true;
+	                    var _didIteratorError4 = false;
+	                    var _iteratorError4 = undefined;
+	
+	                    try {
+	                        for (var _iterator4 = allWordsMap.get(lword)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                            var w = _step4.value;
+	
+	                            if (w.category == category) {
+	                                word.name = name;
+	                                word.type = 'current';
+	                                word.id = w.id;
+	                                break;
+	                            } else if (w.category != 'COMMON' && w.category != 'IGNORE') {
+	                                word.name = name;
+	                                word.type = 'other';
+	                                word.id = w.id;
+	                                break;
+	                            }
+	                        }
+	                    } catch (err) {
+	                        _didIteratorError4 = true;
+	                        _iteratorError4 = err;
+	                    } finally {
+	                        try {
+	                            if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                                _iterator4.return();
+	                            }
+	                        } finally {
+	                            if (_didIteratorError4) {
+	                                throw _iteratorError4;
+	                            }
+	                        }
+	                    }
+	                }
+	                if (!!word.name) {
+	                    words.push({ 'name': tmpNovel, 'key': id });
+	                    id += 1;
+	                    word.key = id;
+	                    words.push(word);
+	                    id += 1;
+	                    tmpNovel = ch;
+	                    name = '';
+	                    continue;
+	                }
+	                tmpNovel += name;
 	                tmpNovel += ch;
 	                if (ch == '\n') {
 	                    tmpNovel += '\n';
 	                }
-	                word = '';
+	                name = '';
+	            }
+	            if (tmpNovel.length > 0) {
+	                words.push({ 'name': tmpNovel, 'key': id });
 	            }
 	            state.novel = tmpNovel;
+	            state.words = words;
+	            state.show = false;
 	            this.setState(state);
 	        }
 	    }, {
 	        key: 'selectOption',
 	        value: function selectOption(option) {
 	            this.props.dispatch(_actions.categoryActions.set(option));
+	            _jsCookie2.default.set('read_option', option);
 	            this.changeWords(option);
 	        }
 	    }, {
@@ -23965,8 +24123,7 @@
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'article-area' },
-	                            _react2.default.createElement('textarea', { className: 'angel-textarea', value: this.state.article, onChange: this.splitArticle, id: 'article' }),
-	                            _react2.default.createElement(Article, this.state)
+	                            _react2.default.createElement(Article, _extends({}, this.state, { handleClick: this.handleClick, hidePopover: this.hidePopover }))
 	                        )
 	                    ),
 	                    _react2.default.createElement(
@@ -60689,6 +60846,15 @@
 			};
 		}
 	};
+	
+	var cocaMapActions = exports.cocaMapActions = {
+		'init': function init(cocaMap) {
+			return {
+				type: 'INIT_COCAMAP',
+				cocaMap: cocaMap
+			};
+		}
+	};
 
 /***/ }),
 /* 473 */
@@ -60800,6 +60966,177 @@
 /* 474 */
 /***/ (function(module, exports, __webpack_require__) {
 
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	 * JavaScript Cookie v2.2.0
+	 * https://github.com/js-cookie/js-cookie
+	 *
+	 * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
+	 * Released under the MIT license
+	 */
+	;(function (factory) {
+		var registeredInModuleLoader = false;
+		if (true) {
+			!(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+			registeredInModuleLoader = true;
+		}
+		if (true) {
+			module.exports = factory();
+			registeredInModuleLoader = true;
+		}
+		if (!registeredInModuleLoader) {
+			var OldCookies = window.Cookies;
+			var api = window.Cookies = factory();
+			api.noConflict = function () {
+				window.Cookies = OldCookies;
+				return api;
+			};
+		}
+	}(function () {
+		function extend () {
+			var i = 0;
+			var result = {};
+			for (; i < arguments.length; i++) {
+				var attributes = arguments[ i ];
+				for (var key in attributes) {
+					result[key] = attributes[key];
+				}
+			}
+			return result;
+		}
+	
+		function init (converter) {
+			function api (key, value, attributes) {
+				var result;
+				if (typeof document === 'undefined') {
+					return;
+				}
+	
+				// Write
+	
+				if (arguments.length > 1) {
+					attributes = extend({
+						path: '/'
+					}, api.defaults, attributes);
+	
+					if (typeof attributes.expires === 'number') {
+						var expires = new Date();
+						expires.setMilliseconds(expires.getMilliseconds() + attributes.expires * 864e+5);
+						attributes.expires = expires;
+					}
+	
+					// We're using "expires" because "max-age" is not supported by IE
+					attributes.expires = attributes.expires ? attributes.expires.toUTCString() : '';
+	
+					try {
+						result = JSON.stringify(value);
+						if (/^[\{\[]/.test(result)) {
+							value = result;
+						}
+					} catch (e) {}
+	
+					if (!converter.write) {
+						value = encodeURIComponent(String(value))
+							.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
+					} else {
+						value = converter.write(value, key);
+					}
+	
+					key = encodeURIComponent(String(key));
+					key = key.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
+					key = key.replace(/[\(\)]/g, escape);
+	
+					var stringifiedAttributes = '';
+	
+					for (var attributeName in attributes) {
+						if (!attributes[attributeName]) {
+							continue;
+						}
+						stringifiedAttributes += '; ' + attributeName;
+						if (attributes[attributeName] === true) {
+							continue;
+						}
+						stringifiedAttributes += '=' + attributes[attributeName];
+					}
+					return (document.cookie = key + '=' + value + stringifiedAttributes);
+				}
+	
+				// Read
+	
+				if (!key) {
+					result = {};
+				}
+	
+				// To prevent the for loop in the first place assign an empty array
+				// in case there are no cookies at all. Also prevents odd result when
+				// calling "get()"
+				var cookies = document.cookie ? document.cookie.split('; ') : [];
+				var rdecode = /(%[0-9A-Z]{2})+/g;
+				var i = 0;
+	
+				for (; i < cookies.length; i++) {
+					var parts = cookies[i].split('=');
+					var cookie = parts.slice(1).join('=');
+	
+					if (!this.json && cookie.charAt(0) === '"') {
+						cookie = cookie.slice(1, -1);
+					}
+	
+					try {
+						var name = parts[0].replace(rdecode, decodeURIComponent);
+						cookie = converter.read ?
+							converter.read(cookie, name) : converter(cookie, name) ||
+							cookie.replace(rdecode, decodeURIComponent);
+	
+						if (this.json) {
+							try {
+								cookie = JSON.parse(cookie);
+							} catch (e) {}
+						}
+	
+						if (key === name) {
+							result = cookie;
+							break;
+						}
+	
+						if (!key) {
+							result[name] = cookie;
+						}
+					} catch (e) {}
+				}
+	
+				return result;
+			}
+	
+			api.set = api;
+			api.get = function (key) {
+				return api.call(api, key);
+			};
+			api.getJSON = function () {
+				return api.apply({
+					json: true
+				}, [].slice.call(arguments));
+			};
+			api.defaults = {};
+	
+			api.remove = function (key, attributes) {
+				api(key, '', extend(attributes, {
+					expires: -1
+				}));
+			};
+	
+			api.withConverter = init;
+	
+			return api;
+		}
+	
+		return init(function () {});
+	}));
+
+
+/***/ }),
+/* 475 */
+/***/ (function(module, exports, __webpack_require__) {
+
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
@@ -60832,6 +61169,9 @@
 	    /*单词以及该单词的各种变形对单词信息的映射*/
 	    wordsMap: new Map(),
 	
+	    /**/
+	    cocaMap: new Map(),
+	
 	    /*显示的单词*/
 	    words: [],
 	
@@ -60850,6 +61190,17 @@
 	            return action.words;
 	        case 'REMOVE_WORD':
 	            return state;
+	        default:
+	            return state;
+	    }
+	}
+	function cocaMapRudcer() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState.cocaMap;
+	    var action = arguments[1];
+	
+	    switch (action.type) {
+	        case 'INIT_COCAMAP':
+	            return action.cocaMap;
 	        default:
 	            return state;
 	    }
@@ -61082,11 +61433,12 @@
 	    wordsMap: wordsMapReducer,
 	    familyMap: familyMapReducer,
 	    words: wordsRuducer,
-	    originMap: originMapReducer
+	    originMap: originMapReducer,
+	    cocaMap: cocaMapRudcer
 	});
 
 /***/ }),
-/* 475 */
+/* 476 */
 /***/ (function(module, exports) {
 
 	// removed by extract-text-webpack-plugin

@@ -9,8 +9,11 @@ var splitArticleToSentence = function(article) {
     let sentences = [];
     let left = 0;
     for(let i = 0; i < article.length; i++) {
-        if(stopWords.indexOf(article[i]) < 0)
-            continue;
+        if(stopWords.indexOf(article[i]) < 0) {
+            if(i != article.length - 1) {
+                continue;
+            }
+        }
         if(i == left) {
             left++;
             continue;
@@ -22,9 +25,7 @@ var splitArticleToSentence = function(article) {
     return sentences;
 }
 
-//splitArticleToSentence("1.2?dasdsadasdsad....4444444444?")
-
-var splitArticle = function(article, category, wordsMap) {
+var splitArticle = function(article, category, wordsMap, cocaMap) {
     article = article.replace(/((Mr)|(Mrs)|(St))\./g,'$1,');
     //article = article.replace(/\.{3}/g,',,,');
     let sentences = splitArticleToSentence(article);
@@ -35,8 +36,15 @@ var splitArticle = function(article, category, wordsMap) {
         //sentence = sentence.replace(/,,,/g,'...');
         sentence = sentence.replace(/‘|’/g,'\'');
         sentence = sentence.trim();
-        let wordsArr = sentence.split(/\.|\?|\!|;|\s|,|_|\*|\&|\%|\+|=|~|:|‘|’|“|”|\(|\)|"|'|—|\$|#|-|\[|\]|\{|\}|\\|\<|\>|\//);
-        for(let name of wordsArr) {
+        let name = '';
+        for (let i in sentence) {
+            let ch = sentence[i];
+            if((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')) {
+                name += ch;
+                if(i != sentence.length - 1) {
+                    continue;
+                }
+            }
             if(!name || /[0-9]+/.test(name))
                 continue;
             name = name.toLowerCase();
@@ -44,57 +52,58 @@ var splitArticle = function(article, category, wordsMap) {
                 name = wordsMap.get(name)[0].name;
             }
             let word = wordsInfo[name];
+            let rank = 100000;
+            if(cocaMap.has(name)) {
+                rank = cocaMap.get(name);
+            }
             if(!!word) {
                 word.count++;
                 word.meanings[0].example += '\n';
                 word.meanings[0].example += sentence;
-                //word.example += '\n';
-                //word.example += sentence;
-            }
-            else {
-                word = {
-                    count : 1,
-                    example : sentence,
-                    name : name,
-                    meanings : [{
-                        id : name + "1",
-                        example : sentence,
-                        meaning : ''
-                    }],
-                    lettertype : '[]',
-                    variant : '{}'
-                };
-                wordsInfo[name] = word;
-                if(!wordsMap.has(name)) {
-                    usefulWords.push(word);
+                if(rank < word.rank) {
+                    word.rank = rank;
                 }
-                
-                else if(category != 'COMMON' && category != 'IGNORE') {
-                    let has = false;
-                    for(let w of wordsMap.get(name)) {
-                        if(w.category == 'COMMON' || w.category == 'IGNORE' || w.state == 1) {
-                            has = true;
-                        }
-                        if(w.category == category && w.state != 1) {
+                name = '';
+                continue;
+            }
+            word = {
+                count : 1,
+                example : sentence,
+                name : name,
+                rank : rank,
+                meanings : [{
+                    id : name + "1",
+                    example : sentence,
+                    meaning : ''
+                }],
+                lettertype : '[]',
+                variant : '{}'
+            };
+            wordsInfo[name] = word;
+            if(!wordsMap.has(name)) {
+                usefulWords.push(word);
+            }
+            else if(category != 'COMMON' && category != 'IGNORE') {
+                let has = true;
+                for(let w of wordsMap.get(name)) {
+                    if(w.category == 'COMMON' || w.category == 'IGNORE') {
+                        has = true;
+                    } else if(w.category == category) {
+                        has = false;
+                    }
+                    for(let meaning of w.meanings) {
+                        if(meaning.category == category) {
                             has = false;
                             break;
                         }
-                        
-                        for(let meaning of w.meanings) {
-                            if(meaning.category != "COMMON" && meaning != "IGNORE") {
-                                has = true;
-                                //word.show = true;
-                                break;
-                            }
-                        }
-                        
                     }
                     if(!has) {
                         usefulWords.push(word);
+                        break;
                     }
                 }
-                
             }
+            name = '';
         }
     }
     return usefulWords;
@@ -104,6 +113,7 @@ var letterToWordMap = function(usefulWords) {
     let words = {};
     let i = 0;
     let all = 0;
+    let wordNum = 0;
     let ratioMap = [];
     for(let i = 1; i <= 20; i++)
         ratioMap[i] = 0;
@@ -113,10 +123,10 @@ var letterToWordMap = function(usefulWords) {
         let count = word.count;
         if(count != num) {
             num = count;
-            console.log("<<< " + num + " >>>\n");
+            //console.log("<<< " + num + " >>>\n");
         }
-        if(count >= 6 || word.show) {
-            console.log(word.name);
+        if(count >= 6) {
+            //console.log(word.name);
             if(!!words[letter]) {
                 words[letter].push(word)
             } else {
@@ -127,11 +137,27 @@ var letterToWordMap = function(usefulWords) {
             ratioMap[20] += count;
         else
             ratioMap[count] += count;
-        all += count;
+        if(count <= 20 && count >= 6) {
+            all += count;
+            wordNum += 1;
+        }
         i++;
     }
-    
-    
+    console.log("<<< coca20000 >>>");
+    for(let word of usefulWords) {
+        if(word.rank < 100000 && word.count >= 6) {
+            console.log(word.name);
+        }
+    }
+    console.log("<<< other >>>");
+    for(let word of usefulWords) {
+        if(word.rank == 100000 && word.count >= 6) {
+            console.log(word.name);
+        }
+    }
+    console.log(wordNum);
+    console.log("average : " + all / wordNum);
+    /*
     console.log("<<<ratio>>>");
     console.log("------------------");
     let ratio = 0.0;
@@ -144,7 +170,7 @@ var letterToWordMap = function(usefulWords) {
     }
     console.log(all);
     console.log("------------------");
-    
+    */
     
     return words;
 }
@@ -170,7 +196,7 @@ class Panel extends React.Component {
         }
     }
     getWords(category, article) {
-        let usefulWords = splitArticle(article, category, this.props.wordsMap);
+        let usefulWords = splitArticle(article, category, this.props.wordsMap, this.props.cocaMap);
         usefulWords.sort(function(a,b) {
             return b.count - a.count;
         });
@@ -205,6 +231,7 @@ class Panel extends React.Component {
 export default connect(function(state) {
     return {
         category : state.categoryInfo.category,
-        wordsMap : state.wordsMap
+        wordsMap : state.wordsMap,
+        cocaMap : state.cocaMap
     }
 })(Panel);

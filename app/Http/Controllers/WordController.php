@@ -32,9 +32,11 @@ class WordController extends Controller {
                     ->select('meaning.id', 'word_id', 'category_id', 'category.name as category')
                     ->get();
 
+
         $response['words'] = $words;
         $response['categorys'] = $categorys;
         $response['meanings'] = $meanings;
+        $response['cocaWords'] = DB::table('coca')->get();
         return $response;
     }
     public function addWord() {
@@ -82,6 +84,12 @@ class WordController extends Controller {
             $data['updated_at'] = date('Y-m-d H:i:s');
             DB::table('meaning')->insert($data);
         }
+        $response['status'] = 1;
+        return $response;
+    }
+    public function getArticle() {
+        $article = DB::table('article')->first();
+        $response['article'] = $article;
         $response['status'] = 1;
         return $response;
     }
@@ -159,7 +167,16 @@ class WordController extends Controller {
     }
     public function doSomething() {
         date_default_timezone_set('PRC');
-
+        /*
+        $file = fopen("coca20000.txt", "r");
+        while(!feof($file)) {
+            $word = explode(" ", fgets($file));
+            $data['name'] = $word[1];
+            $data['rank'] = $word[0];
+            //DB::table('coca')->insert($data);
+        }
+        return;
+        */
         /*
         //迁移释义到meanning表
         $words = DB::table('word')
@@ -200,11 +217,26 @@ class WordController extends Controller {
             }
         }
         */
-        DB::table('word')->where('category', 'DAVID COPPERFIELD')->update(['state' => 1]);
-       
+        //DB::table('word')->where('category', 'DAVID COPPERFIELD')->update(['state' => 1]);
+        
+        $words = DB::table('word')->where('category', 'WUTHERING HEIGHTS')->get();
+        foreach ($words as $i => $word) {
+            $meaning = DB::table('meaning')->where('word_id', $word->id)->first();
+            if($meaning == null) {
+                var_dump($word);
+                $data['entity'] = "";
+                $data['example'] = "";
+                $data['word_id'] = $word->id;
+                $data['category_id'] = 13;
+                $data['created_at'] = date('Y-m-d H:i:s');
+                $data['updated_at'] = date('Y-m-d H:i:s');
+                //DB::table('meaning')->insert($data);
+            }
+        }
+        DB::table('word')->where('category','MAJOR')->delete();
         return;
 
-        DB::table('word')->where('category','DIVERGENT')->delete();
+        DB::table('word')->where('category','MAJOR')->delete();
         $words = DB::table('word')
             ->where('category','GAME')
             ->where('state',1)

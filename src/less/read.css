@@ -47,6 +47,13 @@
   line-height: 1.5;
   font-family: "Verdana";
 }
+.article-area .word {
+  font-weight: bold;
+}
+.article-area .special-word:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
 .category-area {
   width: 300px;
   position: absolute;

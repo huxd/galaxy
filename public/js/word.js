@@ -54,7 +54,7 @@
 	
 	var _redux = __webpack_require__(187);
 	
-	var _reducers = __webpack_require__(474);
+	var _reducers = __webpack_require__(475);
 	
 	var _reactRedux = __webpack_require__(208);
 	
@@ -60440,6 +60440,15 @@
 			};
 		}
 	};
+	
+	var cocaMapActions = exports.cocaMapActions = {
+		'init': function init(cocaMap) {
+			return {
+				type: 'INIT_COCAMAP',
+				cocaMap: cocaMap
+			};
+		}
+	};
 
 /***/ }),
 /* 473 */
@@ -60548,7 +60557,8 @@
 	exports.default = Select;
 
 /***/ }),
-/* 474 */
+/* 474 */,
+/* 475 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -60583,6 +60593,9 @@
 	    /*单词以及该单词的各种变形对单词信息的映射*/
 	    wordsMap: new Map(),
 	
+	    /**/
+	    cocaMap: new Map(),
+	
 	    /*显示的单词*/
 	    words: [],
 	
@@ -60601,6 +60614,17 @@
 	            return action.words;
 	        case 'REMOVE_WORD':
 	            return state;
+	        default:
+	            return state;
+	    }
+	}
+	function cocaMapRudcer() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState.cocaMap;
+	    var action = arguments[1];
+	
+	    switch (action.type) {
+	        case 'INIT_COCAMAP':
+	            return action.cocaMap;
 	        default:
 	            return state;
 	    }
@@ -60833,11 +60857,11 @@
 	    wordsMap: wordsMapReducer,
 	    familyMap: familyMapReducer,
 	    words: wordsRuducer,
-	    originMap: originMapReducer
+	    originMap: originMapReducer,
+	    cocaMap: cocaMapRudcer
 	});
 
 /***/ }),
-/* 475 */,
 /* 476 */,
 /* 477 */,
 /* 478 */,
@@ -61107,6 +61131,34 @@
 	                    }
 	
 	                    this.props.dispatch(_actions.wordsMapActions.init(data.words));
+	
+	                    var cocaMap = new Map();
+	                    var _iteratorNormalCompletion3 = true;
+	                    var _didIteratorError3 = false;
+	                    var _iteratorError3 = undefined;
+	
+	                    try {
+	                        for (var _iterator3 = data.cocaWords[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                            var _word = _step3.value;
+	
+	                            if (!cocaMap.has(_word.name)) cocaMap.set(_word.name, _word.rank);
+	                        }
+	                    } catch (err) {
+	                        _didIteratorError3 = true;
+	                        _iteratorError3 = err;
+	                    } finally {
+	                        try {
+	                            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                                _iterator3.return();
+	                            }
+	                        } finally {
+	                            if (_didIteratorError3) {
+	                                throw _iteratorError3;
+	                            }
+	                        }
+	                    }
+	
+	                    this.props.dispatch(_actions.cocaMapActions.init(cocaMap));
 	                }
 	            }.bind(this));
 	        }
@@ -62128,7 +62180,11 @@
 	    var sentences = [];
 	    var left = 0;
 	    for (var i = 0; i < article.length; i++) {
-	        if (stopWords.indexOf(article[i]) < 0) continue;
+	        if (stopWords.indexOf(article[i]) < 0) {
+	            if (i != article.length - 1) {
+	                continue;
+	            }
+	        }
 	        if (i == left) {
 	            left++;
 	            continue;
@@ -62140,9 +62196,7 @@
 	    return sentences;
 	};
 	
-	//splitArticleToSentence("1.2?dasdsadasdsad....4444444444?")
-	
-	var splitArticle = function splitArticle(article, category, wordsMap) {
+	var splitArticle = function splitArticle(article, category, wordsMap, cocaMap) {
 	    article = article.replace(/((Mr)|(Mrs)|(St))\./g, '$1,');
 	    //article = article.replace(/\.{3}/g,',,,');
 	    var sentences = splitArticleToSentence(article);
@@ -62153,88 +62207,77 @@
 	        //sentence = sentence.replace(/,,,/g,'...');
 	        sentence = sentence.replace(/‘|’/g, '\'');
 	        sentence = sentence.trim();
-	        var wordsArr = sentence.split(/\.|\?|\!|;|\s|,|_|\*|\&|\%|\+|=|~|:|‘|’|“|”|\(|\)|"|'|—|\$|#|-|\[|\]|\{|\}|\\|\<|\>|\//);
-	        var _iteratorNormalCompletion = true;
-	        var _didIteratorError = false;
-	        var _iteratorError = undefined;
-	
-	        try {
-	            for (var _iterator = wordsArr[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	                var name = _step.value;
-	
-	                if (!name || /[0-9]+/.test(name)) continue;
-	                name = name.toLowerCase();
-	                if (wordsMap.has(name)) {
-	                    name = wordsMap.get(name)[0].name;
+	        var name = '';
+	        for (var _i in sentence) {
+	            var ch = sentence[_i];
+	            if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9') {
+	                name += ch;
+	                if (_i != sentence.length - 1) {
+	                    continue;
 	                }
-	                var word = wordsInfo[name];
-	                if (!!word) {
-	                    word.count++;
-	                    word.meanings[0].example += '\n';
-	                    word.meanings[0].example += sentence;
-	                    //word.example += '\n';
-	                    //word.example += sentence;
-	                } else {
-	                    word = {
-	                        count: 1,
-	                        example: sentence,
-	                        name: name,
-	                        meanings: [{
-	                            id: name + "1",
-	                            example: sentence,
-	                            meaning: ''
-	                        }],
-	                        lettertype: '[]',
-	                        variant: '{}'
-	                    };
-	                    wordsInfo[name] = word;
-	                    if (!wordsMap.has(name)) {
-	                        usefulWords.push(word);
-	                    } else if (category != 'COMMON' && category != 'IGNORE') {
-	                        var has = false;
+	            }
+	            if (!name || /[0-9]+/.test(name)) continue;
+	            name = name.toLowerCase();
+	            if (wordsMap.has(name)) {
+	                name = wordsMap.get(name)[0].name;
+	            }
+	            var word = wordsInfo[name];
+	            var rank = 100000;
+	            if (cocaMap.has(name)) {
+	                rank = cocaMap.get(name);
+	            }
+	            if (!!word) {
+	                word.count++;
+	                word.meanings[0].example += '\n';
+	                word.meanings[0].example += sentence;
+	                if (rank < word.rank) {
+	                    word.rank = rank;
+	                }
+	                name = '';
+	                continue;
+	            }
+	            word = {
+	                count: 1,
+	                example: sentence,
+	                name: name,
+	                rank: rank,
+	                meanings: [{
+	                    id: name + "1",
+	                    example: sentence,
+	                    meaning: ''
+	                }],
+	                lettertype: '[]',
+	                variant: '{}'
+	            };
+	            wordsInfo[name] = word;
+	            if (!wordsMap.has(name)) {
+	                usefulWords.push(word);
+	            } else if (category != 'COMMON' && category != 'IGNORE') {
+	                var has = true;
+	                var _iteratorNormalCompletion = true;
+	                var _didIteratorError = false;
+	                var _iteratorError = undefined;
+	
+	                try {
+	                    for (var _iterator = wordsMap.get(name)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	                        var w = _step.value;
+	
+	                        if (w.category == 'COMMON' || w.category == 'IGNORE') {
+	                            has = true;
+	                        } else if (w.category == category) {
+	                            has = false;
+	                        }
 	                        var _iteratorNormalCompletion2 = true;
 	                        var _didIteratorError2 = false;
 	                        var _iteratorError2 = undefined;
 	
 	                        try {
-	                            for (var _iterator2 = wordsMap.get(name)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	                                var w = _step2.value;
+	                            for (var _iterator2 = w.meanings[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	                                var meaning = _step2.value;
 	
-	                                if (w.category == 'COMMON' || w.category == 'IGNORE' || w.state == 1) {
-	                                    has = true;
-	                                }
-	                                if (w.category == category && w.state != 1) {
+	                                if (meaning.category == category) {
 	                                    has = false;
 	                                    break;
-	                                }
-	
-	                                var _iteratorNormalCompletion3 = true;
-	                                var _didIteratorError3 = false;
-	                                var _iteratorError3 = undefined;
-	
-	                                try {
-	                                    for (var _iterator3 = w.meanings[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                                        var meaning = _step3.value;
-	
-	                                        if (meaning.category != "COMMON" && meaning != "IGNORE") {
-	                                            has = true;
-	                                            //word.show = true;
-	                                            break;
-	                                        }
-	                                    }
-	                                } catch (err) {
-	                                    _didIteratorError3 = true;
-	                                    _iteratorError3 = err;
-	                                } finally {
-	                                    try {
-	                                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-	                                            _iterator3.return();
-	                                        }
-	                                    } finally {
-	                                        if (_didIteratorError3) {
-	                                            throw _iteratorError3;
-	                                        }
-	                                    }
 	                                }
 	                            }
 	                        } catch (err) {
@@ -62254,23 +62297,25 @@
 	
 	                        if (!has) {
 	                            usefulWords.push(word);
+	                            break;
+	                        }
+	                    }
+	                } catch (err) {
+	                    _didIteratorError = true;
+	                    _iteratorError = err;
+	                } finally {
+	                    try {
+	                        if (!_iteratorNormalCompletion && _iterator.return) {
+	                            _iterator.return();
+	                        }
+	                    } finally {
+	                        if (_didIteratorError) {
+	                            throw _iteratorError;
 	                        }
 	                    }
 	                }
 	            }
-	        } catch (err) {
-	            _didIteratorError = true;
-	            _iteratorError = err;
-	        } finally {
-	            try {
-	                if (!_iteratorNormalCompletion && _iterator.return) {
-	                    _iterator.return();
-	                }
-	            } finally {
-	                if (_didIteratorError) {
-	                    throw _iteratorError;
-	                }
-	            }
+	            name = '';
 	        }
 	    }
 	    return usefulWords;
@@ -62280,26 +62325,27 @@
 	    var words = {};
 	    var i = 0;
 	    var all = 0;
+	    var wordNum = 0;
 	    var ratioMap = [];
-	    for (var _i = 1; _i <= 20; _i++) {
-	        ratioMap[_i] = 0;
+	    for (var _i2 = 1; _i2 <= 20; _i2++) {
+	        ratioMap[_i2] = 0;
 	    }var num = 0;
-	    var _iteratorNormalCompletion4 = true;
-	    var _didIteratorError4 = false;
-	    var _iteratorError4 = undefined;
+	    var _iteratorNormalCompletion3 = true;
+	    var _didIteratorError3 = false;
+	    var _iteratorError3 = undefined;
 	
 	    try {
-	        for (var _iterator4 = usefulWords[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	            var word = _step4.value;
+	        for (var _iterator3 = usefulWords[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	            var word = _step3.value;
 	
 	            var letter = word.name[0].toUpperCase();
 	            var count = word.count;
 	            if (count != num) {
 	                num = count;
-	                console.log("<<< " + num + " >>>\n");
+	                //console.log("<<< " + num + " >>>\n");
 	            }
-	            if (count >= 6 || word.show) {
-	                console.log(word.name);
+	            if (count >= 6) {
+	                //console.log(word.name);
 	                if (!!words[letter]) {
 	                    words[letter].push(word);
 	                } else {
@@ -62307,8 +62353,39 @@
 	                }
 	            }
 	            if (count >= 20) ratioMap[20] += count;else ratioMap[count] += count;
-	            all += count;
+	            if (count <= 20 && count >= 6) {
+	                all += count;
+	                wordNum += 1;
+	            }
 	            i++;
+	        }
+	    } catch (err) {
+	        _didIteratorError3 = true;
+	        _iteratorError3 = err;
+	    } finally {
+	        try {
+	            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                _iterator3.return();
+	            }
+	        } finally {
+	            if (_didIteratorError3) {
+	                throw _iteratorError3;
+	            }
+	        }
+	    }
+	
+	    console.log("<<< coca20000 >>>");
+	    var _iteratorNormalCompletion4 = true;
+	    var _didIteratorError4 = false;
+	    var _iteratorError4 = undefined;
+	
+	    try {
+	        for (var _iterator4 = usefulWords[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	            var _word = _step4.value;
+	
+	            if (_word.rank < 100000 && _word.count >= 6) {
+	                console.log(_word.name);
+	            }
 	        }
 	    } catch (err) {
 	        _didIteratorError4 = true;
@@ -62325,18 +62402,50 @@
 	        }
 	    }
 	
+	    console.log("<<< other >>>");
+	    var _iteratorNormalCompletion5 = true;
+	    var _didIteratorError5 = false;
+	    var _iteratorError5 = undefined;
+	
+	    try {
+	        for (var _iterator5 = usefulWords[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+	            var _word2 = _step5.value;
+	
+	            if (_word2.rank == 100000 && _word2.count >= 6) {
+	                console.log(_word2.name);
+	            }
+	        }
+	    } catch (err) {
+	        _didIteratorError5 = true;
+	        _iteratorError5 = err;
+	    } finally {
+	        try {
+	            if (!_iteratorNormalCompletion5 && _iterator5.return) {
+	                _iterator5.return();
+	            }
+	        } finally {
+	            if (_didIteratorError5) {
+	                throw _iteratorError5;
+	            }
+	        }
+	    }
+	
+	    console.log(wordNum);
+	    console.log("average : " + all / wordNum);
+	    /*
 	    console.log("<<<ratio>>>");
 	    console.log("------------------");
-	    var ratio = 0.0;
-	    for (var _i2 = 20; _i2 >= 1; _i2--) {
-	        console.log(_i2 + " --> " + ratioMap[_i2] / all * 100 + '%');
-	        ratio += ratioMap[_i2] / all;
-	        if (ratio > 0.5) {
+	    let ratio = 0.0;
+	    for(let i = 20; i >= 1; i--) {
+	        console.log(i + " --> " + (ratioMap[i] / all) * 100 + '%');
+	        ratio += ratioMap[i] / all;
+	        if(ratio > 0.5) {
 	            console.log("<<< " + ratio * 100 + "% >>>");
 	        }
 	    }
 	    console.log(all);
 	    console.log("------------------");
+	    */
 	
 	    return words;
 	};
@@ -62373,7 +62482,7 @@
 	    }, {
 	        key: 'getWords',
 	        value: function getWords(category, article) {
-	            var usefulWords = splitArticle(article, category, this.props.wordsMap);
+	            var usefulWords = splitArticle(article, category, this.props.wordsMap, this.props.cocaMap);
 	            usefulWords.sort(function (a, b) {
 	                return b.count - a.count;
 	            });
@@ -62420,7 +62529,8 @@
 	exports.default = (0, _reactRedux.connect)(function (state) {
 	    return {
 	        category: state.categoryInfo.category,
-	        wordsMap: state.wordsMap
+	        wordsMap: state.wordsMap,
+	        cocaMap: state.cocaMap
 	    };
 	})(Panel);
 

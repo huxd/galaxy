@@ -56,9 +56,9 @@
 	
 	var _reactRedux = __webpack_require__(208);
 	
-	var _reducers = __webpack_require__(474);
+	var _reducers = __webpack_require__(475);
 	
-	var _StudyPage = __webpack_require__(476);
+	var _StudyPage = __webpack_require__(477);
 	
 	var _StudyPage2 = _interopRequireDefault(_StudyPage);
 	
@@ -60440,6 +60440,15 @@
 			};
 		}
 	};
+	
+	var cocaMapActions = exports.cocaMapActions = {
+		'init': function init(cocaMap) {
+			return {
+				type: 'INIT_COCAMAP',
+				cocaMap: cocaMap
+			};
+		}
+	};
 
 /***/ }),
 /* 473 */
@@ -60551,6 +60560,177 @@
 /* 474 */
 /***/ (function(module, exports, __webpack_require__) {
 
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	 * JavaScript Cookie v2.2.0
+	 * https://github.com/js-cookie/js-cookie
+	 *
+	 * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
+	 * Released under the MIT license
+	 */
+	;(function (factory) {
+		var registeredInModuleLoader = false;
+		if (true) {
+			!(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+			registeredInModuleLoader = true;
+		}
+		if (true) {
+			module.exports = factory();
+			registeredInModuleLoader = true;
+		}
+		if (!registeredInModuleLoader) {
+			var OldCookies = window.Cookies;
+			var api = window.Cookies = factory();
+			api.noConflict = function () {
+				window.Cookies = OldCookies;
+				return api;
+			};
+		}
+	}(function () {
+		function extend () {
+			var i = 0;
+			var result = {};
+			for (; i < arguments.length; i++) {
+				var attributes = arguments[ i ];
+				for (var key in attributes) {
+					result[key] = attributes[key];
+				}
+			}
+			return result;
+		}
+	
+		function init (converter) {
+			function api (key, value, attributes) {
+				var result;
+				if (typeof document === 'undefined') {
+					return;
+				}
+	
+				// Write
+	
+				if (arguments.length > 1) {
+					attributes = extend({
+						path: '/'
+					}, api.defaults, attributes);
+	
+					if (typeof attributes.expires === 'number') {
+						var expires = new Date();
+						expires.setMilliseconds(expires.getMilliseconds() + attributes.expires * 864e+5);
+						attributes.expires = expires;
+					}
+	
+					// We're using "expires" because "max-age" is not supported by IE
+					attributes.expires = attributes.expires ? attributes.expires.toUTCString() : '';
+	
+					try {
+						result = JSON.stringify(value);
+						if (/^[\{\[]/.test(result)) {
+							value = result;
+						}
+					} catch (e) {}
+	
+					if (!converter.write) {
+						value = encodeURIComponent(String(value))
+							.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
+					} else {
+						value = converter.write(value, key);
+					}
+	
+					key = encodeURIComponent(String(key));
+					key = key.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
+					key = key.replace(/[\(\)]/g, escape);
+	
+					var stringifiedAttributes = '';
+	
+					for (var attributeName in attributes) {
+						if (!attributes[attributeName]) {
+							continue;
+						}
+						stringifiedAttributes += '; ' + attributeName;
+						if (attributes[attributeName] === true) {
+							continue;
+						}
+						stringifiedAttributes += '=' + attributes[attributeName];
+					}
+					return (document.cookie = key + '=' + value + stringifiedAttributes);
+				}
+	
+				// Read
+	
+				if (!key) {
+					result = {};
+				}
+	
+				// To prevent the for loop in the first place assign an empty array
+				// in case there are no cookies at all. Also prevents odd result when
+				// calling "get()"
+				var cookies = document.cookie ? document.cookie.split('; ') : [];
+				var rdecode = /(%[0-9A-Z]{2})+/g;
+				var i = 0;
+	
+				for (; i < cookies.length; i++) {
+					var parts = cookies[i].split('=');
+					var cookie = parts.slice(1).join('=');
+	
+					if (!this.json && cookie.charAt(0) === '"') {
+						cookie = cookie.slice(1, -1);
+					}
+	
+					try {
+						var name = parts[0].replace(rdecode, decodeURIComponent);
+						cookie = converter.read ?
+							converter.read(cookie, name) : converter(cookie, name) ||
+							cookie.replace(rdecode, decodeURIComponent);
+	
+						if (this.json) {
+							try {
+								cookie = JSON.parse(cookie);
+							} catch (e) {}
+						}
+	
+						if (key === name) {
+							result = cookie;
+							break;
+						}
+	
+						if (!key) {
+							result[name] = cookie;
+						}
+					} catch (e) {}
+				}
+	
+				return result;
+			}
+	
+			api.set = api;
+			api.get = function (key) {
+				return api.call(api, key);
+			};
+			api.getJSON = function () {
+				return api.apply({
+					json: true
+				}, [].slice.call(arguments));
+			};
+			api.defaults = {};
+	
+			api.remove = function (key, attributes) {
+				api(key, '', extend(attributes, {
+					expires: -1
+				}));
+			};
+	
+			api.withConverter = init;
+	
+			return api;
+		}
+	
+		return init(function () {});
+	}));
+
+
+/***/ }),
+/* 475 */
+/***/ (function(module, exports, __webpack_require__) {
+
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
@@ -60583,6 +60763,9 @@
 	    /*单词以及该单词的各种变形对单词信息的映射*/
 	    wordsMap: new Map(),
 	
+	    /**/
+	    cocaMap: new Map(),
+	
 	    /*显示的单词*/
 	    words: [],
 	
@@ -60601,6 +60784,17 @@
 	            return action.words;
 	        case 'REMOVE_WORD':
 	            return state;
+	        default:
+	            return state;
+	    }
+	}
+	function cocaMapRudcer() {
+	    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState.cocaMap;
+	    var action = arguments[1];
+	
+	    switch (action.type) {
+	        case 'INIT_COCAMAP':
+	            return action.cocaMap;
 	        default:
 	            return state;
 	    }
@@ -60833,12 +61027,13 @@
 	    wordsMap: wordsMapReducer,
 	    familyMap: familyMapReducer,
 	    words: wordsRuducer,
-	    originMap: originMapReducer
+	    originMap: originMapReducer,
+	    cocaMap: cocaMapRudcer
 	});
 
 /***/ }),
-/* 475 */,
-/* 476 */
+/* 476 */,
+/* 477 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -60863,7 +61058,7 @@
 	
 	var _reactRedux = __webpack_require__(208);
 	
-	var _jsCookie = __webpack_require__(477);
+	var _jsCookie = __webpack_require__(474);
 	
 	var _jsCookie2 = _interopRequireDefault(_jsCookie);
 	
@@ -60902,6 +61097,8 @@
 	
 	    /*要复习的单词集合*/
 	    var viWords = [];
+	    var reviewWords = [];
+	    var num = 0;
 	    var _iteratorNormalCompletion = true;
 	    var _didIteratorError = false;
 	    var _iteratorError = undefined;
@@ -60911,7 +61108,17 @@
 	            var word = _step.value;
 	
 	            if (word.meanings.length >= 1) {
-	                viWords.push(word);
+	                num++;
+	                var ra = Math.random();
+	                if (word.rank <= 4000 && ra <= 0.1) {
+	                    reviewWords.push(word.id);
+	                } else if (word.rank <= 10000 && ra <= 0.08) {
+	                    reviewWords.push(word.id);
+	                } else if (word.rank <= 20000 && ra <= 0.04) {
+	                    reviewWords.push(word.id);
+	                } else if (word.rank > 20000 && ra <= 0.02) {
+	                    reviewWords.push(word.id);
+	                }
 	            }
 	        }
 	    } catch (err) {
@@ -60929,17 +61136,8 @@
 	        }
 	    }
 	
-	    var len = parseInt(viWords.length * 0.05);
-	    var reviewWords = [];
-	    var hasWord = {};
-	    for (var i = 0; i < len; i++) {
-	        var index = Math.floor(Math.random() * viWords.length);
-	        var id = viWords[index].id;
-	        if (!!hasWord[id]) i--;else {
-	            hasWord[id] = true;
-	            reviewWords.push(id);
-	        }
-	    }
+	    console.log(reviewWords.length / num);
+	    console.log(reviewWords.length);
 	    reviewInfo.date = date.getDate();
 	    reviewInfo.words = reviewWords;
 	    _jsCookie2.default.set('review', JSON.stringify(reviewInfo), { expires: 31 });
@@ -60997,21 +61195,16 @@
 	
 	                    this.props.dispatch(_actions.originMapActions.init(originMap));
 	
-	                    /*初始化wordsMap*/
-	                    var meaningsMap = new Map();
+	                    var cocaMap = new Map();
 	                    var _iteratorNormalCompletion3 = true;
 	                    var _didIteratorError3 = false;
 	                    var _iteratorError3 = undefined;
 	
 	                    try {
-	                        for (var _iterator3 = data.meanings[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-	                            var meaning = _step3.value;
+	                        for (var _iterator3 = data.cocaWords[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                            var _word = _step3.value;
 	
-	                            if (!meaningsMap.has(meaning.word_id)) {
-	                                meaningsMap.set(meaning.word_id, [meaning]);
-	                            } else {
-	                                meaningsMap.get(meaning.word_id).push(meaning);
-	                            }
+	                            if (!cocaMap.has(_word.name)) cocaMap.set(_word.name, _word.rank);
 	                        }
 	                    } catch (err) {
 	                        _didIteratorError3 = true;
@@ -61028,17 +61221,22 @@
 	                        }
 	                    }
 	
+	                    this.props.dispatch(_actions.cocaMapActions.init(cocaMap));
+	
+	                    /*初始化wordsMap*/
+	                    var meaningsMap = new Map();
 	                    var _iteratorNormalCompletion4 = true;
 	                    var _didIteratorError4 = false;
 	                    var _iteratorError4 = undefined;
 	
 	                    try {
-	                        for (var _iterator4 = data.words[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-	                            var _word = _step4.value;
+	                        for (var _iterator4 = data.meanings[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	                            var meaning = _step4.value;
 	
-	                            _word.meanings = [];
-	                            if (meaningsMap.has(_word.id)) {
-	                                _word.meanings = meaningsMap.get(_word.id);
+	                            if (!meaningsMap.has(meaning.word_id)) {
+	                                meaningsMap.set(meaning.word_id, [meaning]);
+	                            } else {
+	                                meaningsMap.get(meaning.word_id).push(meaning);
 	                            }
 	                        }
 	                    } catch (err) {
@@ -61056,7 +61254,6 @@
 	                        }
 	                    }
 	
-	                    var reviewWords = getReviewWords(data.words);
 	                    var _iteratorNormalCompletion5 = true;
 	                    var _didIteratorError5 = false;
 	                    var _iteratorError5 = undefined;
@@ -61065,8 +61262,15 @@
 	                        for (var _iterator5 = data.words[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
 	                            var _word2 = _step5.value;
 	
-	                            if (reviewWords.indexOf(_word2.id) != -1) {
-	                                _word2.review = true;
+	                            _word2.meanings = [];
+	                            if (meaningsMap.has(_word2.id)) {
+	                                _word2.meanings = meaningsMap.get(_word2.id);
+	                            }
+	                            var variant = JSON.parse(_word2.variant);
+	                            variant['origin'] = _word2.name;
+	                            _word2.rank = 100000;
+	                            for (var key in variant) {
+	                                if (cocaMap.has(variant[key]) && cocaMap.get(variant[key]) < _word2.rank) _word2.rank = cocaMap.get(variant[key]);
 	                            }
 	                        }
 	                    } catch (err) {
@@ -61080,6 +61284,34 @@
 	                        } finally {
 	                            if (_didIteratorError5) {
 	                                throw _iteratorError5;
+	                            }
+	                        }
+	                    }
+	
+	                    var reviewWords = getReviewWords(data.words);
+	                    var _iteratorNormalCompletion6 = true;
+	                    var _didIteratorError6 = false;
+	                    var _iteratorError6 = undefined;
+	
+	                    try {
+	                        for (var _iterator6 = data.words[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+	                            var _word3 = _step6.value;
+	
+	                            if (reviewWords.indexOf(_word3.id) != -1) {
+	                                _word3.review = true;
+	                            }
+	                        }
+	                    } catch (err) {
+	                        _didIteratorError6 = true;
+	                        _iteratorError6 = err;
+	                    } finally {
+	                        try {
+	                            if (!_iteratorNormalCompletion6 && _iterator6.return) {
+	                                _iterator6.return();
+	                            }
+	                        } finally {
+	                            if (_didIteratorError6) {
+	                                throw _iteratorError6;
 	                            }
 	                        }
 	                    }
@@ -61114,27 +61346,27 @@
 	            var wordsMap = this.props.wordsMap;
 	            var usefulWords = [];
 	            var wordsInfo = {};
-	            var _iteratorNormalCompletion6 = true;
-	            var _didIteratorError6 = false;
-	            var _iteratorError6 = undefined;
+	            var _iteratorNormalCompletion7 = true;
+	            var _didIteratorError7 = false;
+	            var _iteratorError7 = undefined;
 	
 	            try {
-	                for (var _iterator6 = wordsMap.values()[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-	                    var wordsArr = _step6.value;
-	                    var _iteratorNormalCompletion8 = true;
-	                    var _didIteratorError8 = false;
-	                    var _iteratorError8 = undefined;
+	                for (var _iterator7 = wordsMap.values()[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+	                    var wordsArr = _step7.value;
+	                    var _iteratorNormalCompletion9 = true;
+	                    var _didIteratorError9 = false;
+	                    var _iteratorError9 = undefined;
 	
 	                    try {
-	                        for (var _iterator8 = wordsArr[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-	                            var word = _step8.value;
-	                            var _iteratorNormalCompletion9 = true;
-	                            var _didIteratorError9 = false;
-	                            var _iteratorError9 = undefined;
+	                        for (var _iterator9 = wordsArr[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+	                            var word = _step9.value;
+	                            var _iteratorNormalCompletion10 = true;
+	                            var _didIteratorError10 = false;
+	                            var _iteratorError10 = undefined;
 	
 	                            try {
-	                                for (var _iterator9 = word.meanings[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-	                                    var meaning = _step9.value;
+	                                for (var _iterator10 = word.meanings[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+	                                    var meaning = _step10.value;
 	
 	                                    if (meaning.category == category && !wordsInfo[word.name]) {
 	                                        wordsInfo[word.name] = word;
@@ -61142,73 +61374,34 @@
 	                                        break;
 	                                    }
 	                                }
-	                                /*
-	                                if(word.category == category && !wordsInfo[word.name]) {
-	                                    wordsInfo[word.name] = word;
-	                                    usefulWords.push(word.name);
-	                                    break;
-	                                }
-	                                */
 	                            } catch (err) {
-	                                _didIteratorError9 = true;
-	                                _iteratorError9 = err;
+	                                _didIteratorError10 = true;
+	                                _iteratorError10 = err;
 	                            } finally {
 	                                try {
-	                                    if (!_iteratorNormalCompletion9 && _iterator9.return) {
-	                                        _iterator9.return();
+	                                    if (!_iteratorNormalCompletion10 && _iterator10.return) {
+	                                        _iterator10.return();
 	                                    }
 	                                } finally {
-	                                    if (_didIteratorError9) {
-	                                        throw _iteratorError9;
+	                                    if (_didIteratorError10) {
+	                                        throw _iteratorError10;
 	                                    }
 	                                }
 	                            }
 	                        }
 	                    } catch (err) {
-	                        _didIteratorError8 = true;
-	                        _iteratorError8 = err;
+	                        _didIteratorError9 = true;
+	                        _iteratorError9 = err;
 	                    } finally {
 	                        try {
-	                            if (!_iteratorNormalCompletion8 && _iterator8.return) {
-	                                _iterator8.return();
+	                            if (!_iteratorNormalCompletion9 && _iterator9.return) {
+	                                _iterator9.return();
 	                            }
 	                        } finally {
-	                            if (_didIteratorError8) {
-	                                throw _iteratorError8;
+	                            if (_didIteratorError9) {
+	                                throw _iteratorError9;
 	                            }
 	                        }
-	                    }
-	                }
-	            } catch (err) {
-	                _didIteratorError6 = true;
-	                _iteratorError6 = err;
-	            } finally {
-	                try {
-	                    if (!_iteratorNormalCompletion6 && _iterator6.return) {
-	                        _iterator6.return();
-	                    }
-	                } finally {
-	                    if (_didIteratorError6) {
-	                        throw _iteratorError6;
-	                    }
-	                }
-	            }
-	
-	            usefulWords.sort();
-	            var words = {};
-	            var _iteratorNormalCompletion7 = true;
-	            var _didIteratorError7 = false;
-	            var _iteratorError7 = undefined;
-	
-	            try {
-	                for (var _iterator7 = usefulWords[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
-	                    var _word3 = _step7.value;
-	
-	                    var letter = _word3[0].toUpperCase();
-	                    if (!!words[letter]) {
-	                        words[letter].push(wordsInfo[_word3]);
-	                    } else {
-	                        words[letter] = [wordsInfo[_word3]];
 	                    }
 	                }
 	            } catch (err) {
@@ -61222,6 +61415,55 @@
 	                } finally {
 	                    if (_didIteratorError7) {
 	                        throw _iteratorError7;
+	                    }
+	                }
+	            }
+	
+	            usefulWords.sort();
+	            var words = {
+	                'High Frequency': [],
+	                'Medium Frequency': [],
+	                'Low Frequency': [],
+	                'Tiny Frequency': []
+	            };
+	
+	            var _iteratorNormalCompletion8 = true;
+	            var _didIteratorError8 = false;
+	            var _iteratorError8 = undefined;
+	
+	            try {
+	                for (var _iterator8 = usefulWords[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+	                    var _word4 = _step8.value;
+	
+	                    var letter = _word4[0].toUpperCase();
+	                    if (wordsInfo[_word4].rank <= 4000) {
+	                        words['High Frequency'].push(wordsInfo[_word4]);
+	                    } else if (wordsInfo[_word4].rank <= 10000) {
+	                        words['Medium Frequency'].push(wordsInfo[_word4]);
+	                    } else if (wordsInfo[_word4].rank <= 20000) {
+	                        words['Low Frequency'].push(wordsInfo[_word4]);
+	                    } else {
+	                        words['Tiny Frequency'].push(wordsInfo[_word4]);
+	                    }
+	                    /*
+	                    if(!!words[letter]) {
+	                        words[letter].push(wordsInfo[word]);
+	                    } else {
+	                        words[letter] = [wordsInfo[word]];
+	                    }
+	                    */
+	                }
+	            } catch (err) {
+	                _didIteratorError8 = true;
+	                _iteratorError8 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion8 && _iterator8.return) {
+	                        _iterator8.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError8) {
+	                        throw _iteratorError8;
 	                    }
 	                }
 	            }
@@ -61269,177 +61511,6 @@
 	}
 	
 	exports.default = (0, _reactRedux.connect)(mapStateToProps)(StudyPage);
-
-/***/ }),
-/* 477 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
-	 * JavaScript Cookie v2.2.0
-	 * https://github.com/js-cookie/js-cookie
-	 *
-	 * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
-	 * Released under the MIT license
-	 */
-	;(function (factory) {
-		var registeredInModuleLoader = false;
-		if (true) {
-			!(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-			registeredInModuleLoader = true;
-		}
-		if (true) {
-			module.exports = factory();
-			registeredInModuleLoader = true;
-		}
-		if (!registeredInModuleLoader) {
-			var OldCookies = window.Cookies;
-			var api = window.Cookies = factory();
-			api.noConflict = function () {
-				window.Cookies = OldCookies;
-				return api;
-			};
-		}
-	}(function () {
-		function extend () {
-			var i = 0;
-			var result = {};
-			for (; i < arguments.length; i++) {
-				var attributes = arguments[ i ];
-				for (var key in attributes) {
-					result[key] = attributes[key];
-				}
-			}
-			return result;
-		}
-	
-		function init (converter) {
-			function api (key, value, attributes) {
-				var result;
-				if (typeof document === 'undefined') {
-					return;
-				}
-	
-				// Write
-	
-				if (arguments.length > 1) {
-					attributes = extend({
-						path: '/'
-					}, api.defaults, attributes);
-	
-					if (typeof attributes.expires === 'number') {
-						var expires = new Date();
-						expires.setMilliseconds(expires.getMilliseconds() + attributes.expires * 864e+5);
-						attributes.expires = expires;
-					}
-	
-					// We're using "expires" because "max-age" is not supported by IE
-					attributes.expires = attributes.expires ? attributes.expires.toUTCString() : '';
-	
-					try {
-						result = JSON.stringify(value);
-						if (/^[\{\[]/.test(result)) {
-							value = result;
-						}
-					} catch (e) {}
-	
-					if (!converter.write) {
-						value = encodeURIComponent(String(value))
-							.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
-					} else {
-						value = converter.write(value, key);
-					}
-	
-					key = encodeURIComponent(String(key));
-					key = key.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
-					key = key.replace(/[\(\)]/g, escape);
-	
-					var stringifiedAttributes = '';
-	
-					for (var attributeName in attributes) {
-						if (!attributes[attributeName]) {
-							continue;
-						}
-						stringifiedAttributes += '; ' + attributeName;
-						if (attributes[attributeName] === true) {
-							continue;
-						}
-						stringifiedAttributes += '=' + attributes[attributeName];
-					}
-					return (document.cookie = key + '=' + value + stringifiedAttributes);
-				}
-	
-				// Read
-	
-				if (!key) {
-					result = {};
-				}
-	
-				// To prevent the for loop in the first place assign an empty array
-				// in case there are no cookies at all. Also prevents odd result when
-				// calling "get()"
-				var cookies = document.cookie ? document.cookie.split('; ') : [];
-				var rdecode = /(%[0-9A-Z]{2})+/g;
-				var i = 0;
-	
-				for (; i < cookies.length; i++) {
-					var parts = cookies[i].split('=');
-					var cookie = parts.slice(1).join('=');
-	
-					if (!this.json && cookie.charAt(0) === '"') {
-						cookie = cookie.slice(1, -1);
-					}
-	
-					try {
-						var name = parts[0].replace(rdecode, decodeURIComponent);
-						cookie = converter.read ?
-							converter.read(cookie, name) : converter(cookie, name) ||
-							cookie.replace(rdecode, decodeURIComponent);
-	
-						if (this.json) {
-							try {
-								cookie = JSON.parse(cookie);
-							} catch (e) {}
-						}
-	
-						if (key === name) {
-							result = cookie;
-							break;
-						}
-	
-						if (!key) {
-							result[name] = cookie;
-						}
-					} catch (e) {}
-				}
-	
-				return result;
-			}
-	
-			api.set = api;
-			api.get = function (key) {
-				return api.call(api, key);
-			};
-			api.getJSON = function () {
-				return api.apply({
-					json: true
-				}, [].slice.call(arguments));
-			};
-			api.defaults = {};
-	
-			api.remove = function (key, attributes) {
-				api(key, '', extend(attributes, {
-					expires: -1
-				}));
-			};
-	
-			api.withConverter = init;
-	
-			return api;
-		}
-	
-		return init(function () {});
-	}));
-
 
 /***/ }),
 /* 478 */

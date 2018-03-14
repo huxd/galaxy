@@ -9,6 +9,7 @@ Route::any('/updateWord', 'WordController@updateWord');
 Route::any('/addCategory', 'WordController@addCategory');
 Route::any('/getWordById', 'WordController@getWordById');
 Route::any('/show','WordController@show');
+Route::any('/getArticle','WordController@getArticle');
 Route::any('/doSomething','WordController@doSomething');
 
 Route::any('/study','StudyController@index');
